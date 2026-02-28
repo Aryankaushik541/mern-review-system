@@ -1,63 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
-const Dashboard = () => {
+function Dashboard() {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    avgRating: 0,
+    pending: 0,
+    replied: 0
+  });
 
   useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  const fetchReviews = async () => {
-    try {
-      const response = await axios.get('/api/reviews');
-      if (response.data.success) {
-        setReviews(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    }
-  };
-
-  const handleReplyChange = (reviewId, value) => {
-    setReplyText({
-      ...replyText,
-      [reviewId]: value
-    });
-  };
-
-  const handleReplySubmit = async (reviewId) => {
-    if (!replyText[reviewId] || replyText[reviewId].trim() === '') {
-      setMessage('Please enter a reply');
+    // Check if user is admin
+    const userData = localStorage.getItem('user');
+    if (!userData) {
+      navigate('/login');
       return;
     }
 
-    setLoading(true);
-    setMessage('');
+    const parsedUser = JSON.parse(userData);
+    if (parsedUser.role !== 'admin') {
+      alert('Access denied. Admin only.');
+      navigate('/reviews');
+      return;
+    }
 
+    setUser(parsedUser);
+    fetchReviews();
+  }, [navigate]);
+
+  const fetchReviews = async () => {
     try {
-      const response = await axios.put(`/api/reviews/${reviewId}/reply`, {
-        adminReply: replyText[reviewId]
-      });
-
-      if (response.data.success) {
-        setMessage('Reply added successfully!');
-        setReplyText({
-          ...replyText,
-          [reviewId]: ''
-        });
-        fetchReviews();
-        setTimeout(() => setMessage(''), 3000);
+      const response = await fetch('http://localhost:5000/api/reviews');
+      const data = await response.json();
+      
+      if (data.success) {
+        setReviews(data.data);
+        calculateStats(data.data);
       }
     } catch (error) {
-      setMessage('Error adding reply. Please try again.');
-      console.error('Error:', error);
+      console.error('Error fetching reviews:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const calculateStats = (reviewsData) => {
+    const total = reviewsData.length;
+    const avgRating = total > 0 
+      ? (reviewsData.reduce((sum, r) => sum + r.rating, 0) / total).toFixed(1)
+      : 0;
+    const replied = reviewsData.filter(r => r.adminReply).length;
+    const pending = total - replied;
+
+    setStats({ total, avgRating, pending, replied });
+  };
+
+  const handleReply = async (reviewId) => {
+    const reply = replyText[reviewId];
+    if (!reply || !reply.trim()) {
+      alert('Please enter a reply');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}/reply`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ adminReply: reply })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Reply added successfully!');
+        setReplyText({ ...replyText, [reviewId]: '' });
+        fetchReviews();
+      } else {
+        alert(data.message || 'Failed to add reply');
+      }
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      alert('Error adding reply');
     }
   };
 
@@ -66,117 +100,193 @@ const Dashboard = () => {
       return;
     }
 
+    const token = localStorage.getItem('token');
+
     try {
-      const response = await axios.delete(`/api/reviews/${reviewId}`);
-      if (response.data.success) {
-        setMessage('Review deleted successfully!');
+      const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Review deleted successfully!');
         fetchReviews();
-        setTimeout(() => setMessage(''), 3000);
+      } else {
+        alert(data.message || 'Failed to delete review');
       }
     } catch (error) {
-      setMessage('Error deleting review.');
-      console.error('Error:', error);
+      console.error('Error deleting review:', error);
+      alert('Error deleting review');
     }
   };
 
-  const renderStars = (rating) => {
-    return [...Array(5)].map((_, index) => (
-      <span key={index} className={index < rating ? 'star filled' : 'star'}>
-        ★
-      </span>
-    ));
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
-  const getStats = () => {
-    const totalReviews = reviews.length;
-    const repliedReviews = reviews.filter(r => r.adminReply).length;
-    const avgRating = reviews.length > 0 
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-      : 0;
-
-    return { totalReviews, repliedReviews, avgRating };
+  const getRatingColor = (rating) => {
+    if (rating >= 4.5) return '#0071c2';
+    if (rating >= 3.5) return '#008009';
+    if (rating >= 2.5) return '#ff8c00';
+    return '#cc0000';
   };
 
-  const stats = getStats();
+  const getRatingText = (rating) => {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 3.5) return 'Good';
+    if (rating >= 2.5) return 'Average';
+    return 'Poor';
+  };
 
   return (
     <div className="dashboard">
-      <div className="dashboard-container">
-        <h1>Admin Dashboard</h1>
-        
-        {message && <div className="dashboard-message">{message}</div>}
+      {/* Header */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <h1>Admin Dashboard</h1>
+          <div className="header-actions">
+            <span className="admin-name">👤 {user?.name}</span>
+            <button onClick={() => navigate('/reviews')} className="view-reviews-btn">
+              View Public Reviews
+            </button>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
 
+      <div className="dashboard-container">
+        {/* Statistics Cards */}
         <div className="stats-grid">
           <div className="stat-card">
-            <h3>Total Reviews</h3>
-            <p className="stat-number">{stats.totalReviews}</p>
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+              📊
+            </div>
+            <div className="stat-info">
+              <h3>{stats.total}</h3>
+              <p>Total Reviews</p>
+            </div>
           </div>
+
           <div className="stat-card">
-            <h3>Replied</h3>
-            <p className="stat-number">{stats.repliedReviews}</p>
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
+              ⭐
+            </div>
+            <div className="stat-info">
+              <h3>{stats.avgRating}</h3>
+              <p>Average Rating</p>
+            </div>
           </div>
+
           <div className="stat-card">
-            <h3>Average Rating</h3>
-            <p className="stat-number">{stats.avgRating} ★</p>
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+              ⏳
+            </div>
+            <div className="stat-info">
+              <h3>{stats.pending}</h3>
+              <p>Pending Replies</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
+              ✅
+            </div>
+            <div className="stat-info">
+              <h3>{stats.replied}</h3>
+              <p>Replied</p>
+            </div>
           </div>
         </div>
 
-        <div className="reviews-management">
-          <h2>Manage Reviews</h2>
-          {reviews.length === 0 ? (
-            <p className="no-reviews">No reviews to manage yet.</p>
+        {/* Reviews Management */}
+        <div className="reviews-section">
+          <div className="section-header">
+            <h2>Manage Reviews</h2>
+            <p>Review and respond to customer feedback</p>
+          </div>
+
+          {loading ? (
+            <div className="loading">Loading reviews...</div>
+          ) : reviews.length === 0 ? (
+            <div className="no-reviews">
+              <p>No reviews yet</p>
+            </div>
           ) : (
-            <div className="dashboard-reviews-list">
+            <div className="reviews-grid">
               {reviews.map((review) => (
-                <div key={review._id} className="dashboard-review-card">
-                  <div className="review-info">
-                    <div className="review-header-dash">
-                      <div>
-                        <h3>{review.name}</h3>
-                        <p className="review-email">{review.email}</p>
+                <div key={review._id} className="review-card-admin">
+                  <div className="review-header-admin">
+                    <div className="reviewer-info">
+                      <div className="reviewer-avatar">
+                        {review.name.charAt(0).toUpperCase()}
                       </div>
-                      <div className="review-meta">
-                        <div className="stars">{renderStars(review.rating)}</div>
-                        <span className="review-date">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </span>
+                      <div>
+                        <h4>{review.name}</h4>
+                        <p className="reviewer-email">{review.email}</p>
+                        <p className="review-date">
+                          {new Date(review.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
                       </div>
                     </div>
-                    <p className="review-comment">{review.comment}</p>
+                    <div className="review-rating-admin" style={{ backgroundColor: getRatingColor(review.rating) }}>
+                      <span className="rating-number">{review.rating.toFixed(1)}</span>
+                      <span className="rating-text">{getRatingText(review.rating)}</span>
+                    </div>
+                  </div>
+
+                  <div className="review-content-admin">
+                    <p>{review.comment}</p>
                   </div>
 
                   {review.adminReply ? (
                     <div className="existing-reply">
-                      <strong>Your Reply:</strong>
+                      <div className="reply-header">
+                        <strong>✅ Your Reply</strong>
+                        <span className="reply-date">
+                          {new Date(review.repliedAt).toLocaleDateString()}
+                        </span>
+                      </div>
                       <p>{review.adminReply}</p>
-                      <span className="reply-date">
-                        Replied on {new Date(review.repliedAt).toLocaleDateString()}
-                      </span>
                     </div>
                   ) : (
                     <div className="reply-section">
                       <textarea
-                        placeholder="Write your reply..."
+                        placeholder="Write your reply to this review..."
                         value={replyText[review._id] || ''}
-                        onChange={(e) => handleReplyChange(review._id, e.target.value)}
+                        onChange={(e) => setReplyText({ ...replyText, [review._id]: e.target.value })}
                         rows="3"
                       />
-                      <button
-                        onClick={() => handleReplySubmit(review._id)}
-                        disabled={loading}
+                      <button 
+                        onClick={() => handleReply(review._id)}
                         className="reply-btn"
                       >
-                        {loading ? 'Sending...' : 'Send Reply'}
+                        Send Reply
                       </button>
                     </div>
                   )}
 
-                  <button
-                    onClick={() => handleDelete(review._id)}
-                    className="delete-btn"
-                  >
-                    Delete Review
-                  </button>
+                  <div className="review-actions">
+                    <button 
+                      onClick={() => handleDelete(review._id)}
+                      className="delete-btn"
+                    >
+                      🗑️ Delete Review
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -185,6 +295,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Dashboard;
