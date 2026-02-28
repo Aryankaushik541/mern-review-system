@@ -39,6 +39,7 @@ function ReviewPage() {
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
+      alert('Error loading reviews. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -51,6 +52,17 @@ function ReviewPage() {
     if (!token) {
       alert('Please login to submit a review');
       navigate('/login');
+      return;
+    }
+
+    // Frontend validation
+    if (!newReview.comment || newReview.comment.trim().length < 10) {
+      alert('Comment must be at least 10 characters long');
+      return;
+    }
+
+    if (newReview.rating < 1 || newReview.rating > 5) {
+      alert('Rating must be between 1 and 5');
       return;
     }
 
@@ -72,11 +84,12 @@ function ReviewPage() {
         setNewReview({ rating: 5, comment: '' });
         fetchReviews();
       } else {
+        // Show detailed error message from backend
         alert(data.message || 'Failed to submit review');
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('Error submitting review');
+      alert('Error submitting review. Please try again.');
     }
   };
 
@@ -140,6 +153,9 @@ function ReviewPage() {
     if (rating >= 2.5) return 'Average';
     return 'Poor';
   };
+
+  const commentLength = newReview.comment.trim().length;
+  const isCommentValid = commentLength >= 10;
 
   return (
     <div className="review-page">
@@ -337,20 +353,45 @@ function ReviewPage() {
                 </div>
               </div>
               <div className="form-group">
-                <label>Your Review</label>
+                <label>
+                  Your Review 
+                  <span style={{ 
+                    marginLeft: '10px', 
+                    fontSize: '0.9em',
+                    color: isCommentValid ? '#008009' : '#cc0000'
+                  }}>
+                    ({commentLength}/10 characters minimum)
+                  </span>
+                </label>
                 <textarea
                   value={newReview.comment}
                   onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
-                  placeholder="Share your experience..."
+                  placeholder="Share your experience... (minimum 10 characters)"
                   rows="5"
                   required
+                  style={{
+                    borderColor: newReview.comment && !isCommentValid ? '#cc0000' : undefined
+                  }}
                 />
+                {newReview.comment && !isCommentValid && (
+                  <small style={{ color: '#cc0000', marginTop: '5px', display: 'block' }}>
+                    Please write at least {10 - commentLength} more character{10 - commentLength !== 1 ? 's' : ''}
+                  </small>
+                )}
               </div>
               <div className="modal-actions">
                 <button type="button" onClick={() => setShowReviewForm(false)} className="cancel-btn">
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={!isCommentValid}
+                  style={{
+                    opacity: isCommentValid ? 1 : 0.5,
+                    cursor: isCommentValid ? 'pointer' : 'not-allowed'
+                  }}
+                >
                   Submit Review
                 </button>
               </div>
