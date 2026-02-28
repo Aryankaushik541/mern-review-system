@@ -38,7 +38,9 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password,
-      role: role || 'user'
+      role: role || 'user',
+      isActive: true,
+      loginCount: 0
     });
 
     await user.save();
@@ -91,6 +93,9 @@ router.post('/login', async (req, res) => {
         message: 'Invalid email or password'
       });
     }
+
+    // Update login info
+    await user.updateLoginInfo();
 
     // Generate token
     const token = generateToken(user._id);
