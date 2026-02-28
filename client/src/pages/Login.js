@@ -97,6 +97,10 @@ function Login() {
             />
           </div>
 
+          <div className="forgot-password-link">
+            <Link to="/forgot-password">Forgot Password?</Link>
+          </div>
+
           <button 
             type="submit" 
             className="auth-button"
