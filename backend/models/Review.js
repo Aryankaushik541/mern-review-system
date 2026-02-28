@@ -1,5 +1,45 @@
 const mongoose = require('mongoose');
 
+// Reply schema for nested comments (Reddit/Facebook style)
+const replySchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  userName: {
+    type: String,
+    required: true
+  },
+  userEmail: {
+    type: String,
+    required: true
+  },
+  userRole: {
+    type: String,
+    enum: ['user', 'admin'],
+    required: true
+  },
+  text: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: [1, 'Reply cannot be empty']
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  },
+  isEdited: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const reviewSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -29,18 +69,26 @@ const reviewSchema = new mongoose.Schema({
     trim: true,
     minlength: [10, 'Comment must be at least 10 characters']
   },
-  adminReply: {
-    type: String,
-    default: null
-  },
-  repliedAt: {
-    type: Date,
-    default: null
-  },
+  // Nested replies array (unlimited replies)
+  replies: [replySchema],
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  },
+  isEdited: {
+    type: Boolean,
+    default: false
   }
+});
+
+// Update the updatedAt timestamp before saving
+reviewSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
 });
 
 module.exports = mongoose.model('Review', reviewSchema);
