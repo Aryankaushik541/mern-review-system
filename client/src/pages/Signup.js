@@ -8,8 +8,7 @@ function Signup() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    role: 'user'
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,7 +48,7 @@ function Signup() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: formData.role
+          role: 'user' // Always create as regular user
         })
       });
 
@@ -60,12 +59,8 @@ function Signup() {
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data));
 
-        // Redirect based on role
-        if (data.data.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/reviews');
-        }
+        // Redirect to reviews page
+        navigate('/');
       } else {
         setError(data.message || 'Registration failed');
       }
@@ -142,20 +137,6 @@ function Signup() {
               placeholder="Confirm your password"
               required
             />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="role">Account Type</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="role-select"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
           </div>
 
           <button 
