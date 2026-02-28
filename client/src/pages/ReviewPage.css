@@ -1,27 +1,46 @@
-.review-page {
-  min-height: 100vh;
-  background-color: #f5f5f5;
+/* ========================================
+   PREMIUM REVIEW PAGE - BOOKING STYLE
+   ======================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+.review-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+}
+
+/* ========================================
+   HEADER - BOOKING.COM STYLE
+   ======================================== */
+
 .review-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  box-shadow: 0 4px 20px rgba(0, 53, 128, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 3px solid #febb02;
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.header-content h1 {
-  margin: 0;
+.review-header h1 {
+  color: #ffffff;
   font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
 .header-actions {
@@ -31,434 +50,873 @@
 }
 
 .user-name {
-  font-size: 14px;
-  opacity: 0.9;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
 }
 
-.write-review-btn, .logout-btn, .login-btn {
-  padding: 10px 20px;
+.admin-btn,
+.write-review-btn,
+.login-btn,
+.signup-btn,
+.logout-btn {
+  padding: 12px 28px;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
+  font-size: 15px;
   font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.admin-btn {
+  background: #febb02;
+  color: #003580;
+  box-shadow: 0 4px 12px rgba(254, 187, 2, 0.3);
+}
+
+.admin-btn:hover {
+  background: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(254, 187, 2, 0.4);
 }
 
 .write-review-btn {
-  background: white;
-  color: #667eea;
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
-.logout-btn {
-  background: rgba(255,255,255,0.2);
-  color: white;
-  border: 1px solid white;
+.write-review-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .login-btn {
-  background: white;
-  color: #667eea;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-.write-review-btn:hover, .login-btn:hover {
+.login-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.signup-btn {
+  background: #febb02;
+  color: #003580;
+  box-shadow: 0 4px 12px rgba(254, 187, 2, 0.3);
+}
+
+.signup-btn:hover {
+  background: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(254, 187, 2, 0.4);
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .logout-btn:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
 }
+
+/* ========================================
+   CONTAINER
+   ======================================== */
 
 .review-container {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
 }
 
+/* ========================================
+   RATING SUMMARY - BOOKING STYLE
+   ======================================== */
+
 .rating-summary {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 35px;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 53, 128, 0.08);
 }
 
 .overall-rating {
   display: flex;
-  gap: 20px;
+  gap: 30px;
   align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 35px;
+  padding-bottom: 30px;
+  border-bottom: 2px solid #f3f4f6;
 }
 
 .rating-score {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 42px;
+  font-weight: 700;
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .rating-info h2 {
-  margin: 0 0 5px 0;
-  font-size: 20px;
-  color: #333;
+  font-size: 28px;
+  color: #003580;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.stars-display {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0;
 }
 
 .rating-info p {
-  margin: 3px 0;
-  color: #666;
-  font-size: 14px;
+  font-size: 15px;
+  color: #6b7280;
+  margin: 8px 0;
+  font-weight: 500;
 }
 
 .real-reviews {
-  font-size: 12px !important;
-  color: #008009 !important;
+  font-size: 13px;
+  color: #9ca3af;
+  font-style: italic;
 }
 
+/* ========================================
+   CATEGORIES - BOOKING STYLE
+   ======================================== */
+
 .categories-section h3 {
-  margin: 0 0 20px 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 20px;
+  color: #003580;
+  margin-bottom: 20px;
+  font-weight: 700;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
 }
 
 .category-item {
-  display: grid;
-  grid-template-columns: 120px 1fr 40px;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.category-item:hover {
+  background: #f3f4f6;
+  transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.category-item span:first-child {
   font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+  min-width: 140px;
 }
 
 .category-bar {
+  flex: 1;
   height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
+  background: #e5e7eb;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background: #0071c2;
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #003580 0%, #0057b8 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease;
 }
 
 .category-score {
-  font-weight: 600;
-  color: #333;
+  font-size: 15px;
+  font-weight: 700;
+  color: #003580;
+  min-width: 35px;
   text-align: right;
 }
 
+/* ========================================
+   FILTERS - BOOKING STYLE
+   ======================================== */
+
 .filters-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 53, 128, 0.08);
 }
 
 .filters-section h3 {
-  margin: 0 0 15px 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 20px;
+  color: #003580;
+  margin-bottom: 20px;
+  font-weight: 700;
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
 }
 
 .filter-group label {
+  display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #374151;
+  margin-bottom: 10px;
 }
 
 .filter-group select {
-  padding: 10px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #ffffff;
   cursor: pointer;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  color: #374151;
+  font-weight: 500;
+}
+
+.filter-group select:hover {
+  border-color: #003580;
 }
 
 .filter-group select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #003580;
+  box-shadow: 0 0 0 3px rgba(0, 53, 128, 0.1);
 }
 
+/* ========================================
+   REVIEWS LIST - PREMIUM CARDS
+   ======================================== */
+
 .reviews-list {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 35px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 53, 128, 0.08);
 }
 
 .reviews-list h3 {
-  margin: 0 0 20px 0;
-  font-size: 18px;
-  color: #333;
+  font-size: 24px;
+  color: #003580;
+  margin-bottom: 30px;
+  font-weight: 700;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f3f4f6;
 }
 
 .review-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 15px;
-  transition: box-shadow 0.3s ease;
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 25px;
+  transition: all 0.3s ease;
+  border: 1px solid #e5e7eb;
 }
 
 .review-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 25px rgba(0, 53, 128, 0.12);
+  transform: translateY(-3px);
+  background: #ffffff;
 }
 
 .review-header-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .reviewer-info {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 15px;
+  align-items: flex-start;
 }
 
 .reviewer-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 53, 128, 0.2);
 }
 
 .reviewer-info h4 {
-  margin: 0;
-  font-size: 16px;
-  color: #333;
+  font-size: 18px;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
 }
 
 .review-date {
-  margin: 3px 0 0 0;
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.edited-badge {
+  color: #f59e0b;
+  font-weight: 600;
+  font-style: italic;
 }
 
 .review-rating {
-  width: 50px;
-  height: 50px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
+  padding: 15px 20px;
+  border-radius: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.review-content {
+  margin: 20px 0;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  border-left: 4px solid #003580;
 }
 
 .review-content p {
-  margin: 0;
-  color: #333;
-  line-height: 1.6;
-  font-size: 14px;
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.7;
+}
+
+/* ========================================
+   NESTED REPLIES - BOOKING STYLE
+   ======================================== */
+
+.replies-section {
+  margin: 25px 0;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 12px;
+  border-left: 4px solid #10b981;
+}
+
+.replies-section h4 {
+  font-size: 16px;
+  color: #111827;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.reply-item {
+  padding: 18px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.reply-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateX(5px);
 }
 
 .admin-reply {
-  margin-top: 15px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-left: 3px solid #667eea;
-  border-radius: 4px;
+  border-left: 4px solid #003580;
+  background: linear-gradient(to right, #f0f9ff 0%, #ffffff 100%);
 }
 
-.admin-reply strong {
-  color: #667eea;
-  font-size: 14px;
+.user-reply {
+  border-left: 4px solid #10b981;
 }
 
-.admin-reply p {
-  margin: 8px 0;
-  color: #333;
-  font-size: 14px;
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.reply-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reply-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 53, 128, 0.2);
+}
+
+.reply-author strong {
+  font-size: 15px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
 }
 
 .reply-date {
   font-size: 12px;
-  color: #666;
+  color: #9ca3af;
+  margin-top: 5px;
 }
 
-/* Modal Styles */
+.reply-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.reply-actions button {
+  padding: 8px 12px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.reply-actions button:hover {
+  background: #e5e7eb;
+  transform: scale(1.1);
+}
+
+.reply-text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 8px;
+}
+
+/* ========================================
+   ADD REPLY SECTION
+   ======================================== */
+
+.add-reply-section {
+  margin: 20px 0;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+}
+
+.add-reply-section textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  background: #ffffff;
+}
+
+.add-reply-section textarea:focus {
+  outline: none;
+  border-color: #003580;
+  box-shadow: 0 0 0 3px rgba(0, 53, 128, 0.1);
+}
+
+.reply-btn {
+  padding: 12px 24px;
+  border: none;
+  background: #10b981;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.reply-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+/* ========================================
+   EDIT REPLY FORM
+   ======================================== */
+
+.edit-reply-form {
+  margin-top: 12px;
+}
+
+.edit-reply-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 10px;
+  background: #ffffff;
+}
+
+.edit-reply-form textarea:focus {
+  outline: none;
+  border-color: #003580;
+  box-shadow: 0 0 0 3px rgba(0, 53, 128, 0.1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.save-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.cancel-btn {
+  background: #6b7280;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
+}
+
+.cancel-btn:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   MODAL - REVIEW FORM
+   ======================================== */
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
+  align-items: center;
+  z-index: 2000;
   padding: 20px;
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 30px;
-  max-width: 500px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-content h2 {
-  margin: 0 0 20px 0;
-  color: #333;
+  font-size: 28px;
+  color: #003580;
+  margin-bottom: 30px;
+  font-weight: 700;
+  text-align: center;
 }
 
-.modal-content .form-group {
-  margin-bottom: 20px;
+.form-group {
+  margin-bottom: 25px;
 }
 
-.modal-content label {
+.form-group label {
   display: block;
-  margin-bottom: 8px;
+  font-size: 15px;
   font-weight: 600;
-  color: #333;
-  font-size: 14px;
+  color: #374151;
+  margin-bottom: 12px;
 }
 
-.rating-slider {
-  width: 100%;
-  height: 8px;
-  border-radius: 4px;
-  outline: none;
-  -webkit-appearance: none;
-  background: #e0e0e0;
-}
-
-.rating-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #667eea;
-  cursor: pointer;
-}
-
-.rating-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #667eea;
-  cursor: pointer;
-  border: none;
-}
-
-.rating-labels {
+.star-rating-input {
   display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-  font-size: 12px;
-  color: #666;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
 }
 
-.modal-content textarea {
+.form-group textarea {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
   font-family: inherit;
   resize: vertical;
+  min-height: 150px;
+  transition: all 0.3s ease;
 }
 
-.modal-content textarea:focus {
+.form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #003580;
+  box-shadow: 0 0 0 3px rgba(0, 53, 128, 0.1);
 }
 
 .modal-actions {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
+  gap: 15px;
+  margin-top: 30px;
 }
 
-.cancel-btn, .submit-btn {
-  padding: 10px 20px;
+.modal-actions button {
+  flex: 1;
+  padding: 15px;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.cancel-btn {
-  background: #e0e0e0;
-  color: #333;
-}
-
 .submit-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 53, 128, 0.3);
 }
 
-.cancel-btn:hover {
-  background: #d0d0d0;
-}
-
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 25px rgba(0, 53, 128, 0.4);
+}
+
+.submit-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.modal-actions .cancel-btn {
+  background: #6b7280;
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.modal-actions .cancel-btn:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .review-container {
+    padding: 30px 20px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .overall-rating {
+    flex-direction: column;
     text-align: center;
   }
-
-  .categories-grid {
-    grid-template-columns: 1fr;
-  }
-
+  
+  .categories-grid,
   .filters-grid {
     grid-template-columns: 1fr;
   }
-
+  
   .review-header-card {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+    gap: 15px;
   }
+  
+  .modal-content {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-header h1 {
+    font-size: 22px;
+  }
+  
+  .rating-score {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+  
+  .admin-btn,
+  .write-review-btn,
+  .login-btn,
+  .signup-btn,
+  .logout-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-card,
+.rating-summary,
+.filters-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #003580;
 }
