@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ReviewPage.css';
+import './BookingReviewStyles.css';
 
 function ReviewPage() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function ReviewPage() {
   const [user, setUser] = useState(null);
   const [replyText, setReplyText] = useState({});
   const [editingReply, setEditingReply] = useState({});
+  const [bookingStats, setBookingStats] = useState(null);
   const [filters, setFilters] = useState({
     scores: 'all',
     sortBy: 'recent'
@@ -47,6 +49,7 @@ function ReviewPage() {
         );
         
         setReviews(reviewsWithReplies);
+        setBookingStats(data.bookingStats);
       } else {
         alert(data.message || 'Failed to load reviews');
       }
@@ -184,32 +187,30 @@ function ReviewPage() {
     if (reviews.length === 0) {
       return {
         avgRating: 0,
-        categories: {
-          staff: 0,
-          facilities: 0,
-          cleanliness: 0,
-          comfort: 0,
-          valueForMoney: 0,
-          location: 0,
-          freeWifi: 0
-        }
+        avgBookingScore: 0,
+        categories: {}
       };
     }
 
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
     const avgRating = totalRating / reviews.length;
 
-    const categories = {
+    // Use Booking.com category scores if available
+    const categories = bookingStats?.categoryScores || {
       staff: (avgRating * 0.95).toFixed(1),
       facilities: (avgRating * 0.92).toFixed(1),
-      cleanliness: (avgRating * 0.98).toFixed(1),
+      clean: (avgRating * 0.98).toFixed(1),
       comfort: (avgRating * 0.90).toFixed(1),
-      valueForMoney: (avgRating * 0.85).toFixed(1),
+      value: (avgRating * 0.85).toFixed(1),
       location: (avgRating * 0.99).toFixed(1),
-      freeWifi: (avgRating * 0.94).toFixed(1)
+      wifi: (avgRating * 0.94).toFixed(1)
     };
 
-    return { avgRating, categories };
+    return { 
+      avgRating, 
+      avgBookingScore: bookingStats?.averageBookingScore || avgRating.toFixed(1),
+      categories 
+    };
   };
 
   const stats = calculateStats();
@@ -257,6 +258,16 @@ function ReviewPage() {
     return stars;
   };
 
+  const renderCategoryScore = (score) => {
+    if (!score || score === '0.0') return null;
+    const numScore = parseFloat(score);
+    return (
+      <div className="category-score-badge" style={{ backgroundColor: getRatingColor(numScore / 2) }}>
+        {score}
+      </div>
+    );
+  };
+
   return (
     <div className="review-page">
       {/* Header */}
@@ -295,26 +306,30 @@ function ReviewPage() {
         <div className="rating-summary">
           <div className="overall-rating">
             <div className="rating-score" style={{ backgroundColor: getRatingColor(stats.avgRating) }}>
-              {stats.avgRating.toFixed(1)}
+              {stats.avgBookingScore}
             </div>
             <div className="rating-info">
               <h2>{getRatingText(stats.avgRating)}</h2>
               <p>{reviews.length} verified reviews from Booking.com</p>
               <div className="stars-display">{renderStars(Math.round(stats.avgRating))}</div>
+              <p className="booking-score-note">Booking.com Score: {stats.avgBookingScore}/10</p>
             </div>
           </div>
 
           <div className="categories-rating">
-            <h3>Categories:</h3>
+            <h3>Guest Ratings:</h3>
             {Object.entries(stats.categories).map(([key, value]) => (
               <div key={key} className="category-item">
                 <span className="category-name">
-                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                  {key === 'clean' ? 'Cleanliness' : 
+                   key === 'wifi' ? 'Free WiFi' :
+                   key === 'value' ? 'Value for Money' :
+                   key.charAt(0).toUpperCase() + key.slice(1)}
                 </span>
                 <div className="category-bar">
                   <div 
                     className="category-fill" 
-                    style={{ width: `${(value / 5) * 100}%` }}
+                    style={{ width: `${(parseFloat(value) / 10) * 100}%` }}
                   ></div>
                 </div>
                 <span className="category-score">{value}</span>
@@ -377,8 +392,13 @@ function ReviewPage() {
                       {review.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h4>{review.name}</h4>
-                      <span className="source-badge booking">🏨 Booking.com Guest</span>
+                      <h4>
+                        {review.name}
+                        {review.bookingData?.isGenius && (
+                          <span className="genius-badge">⚡ Genius</span>
+                        )}
+                      </h4>
+                      <span className="source-badge booking">🏨 Booking.com Verified Guest</span>
                       <div className="stars-display">{renderStars(review.rating)}</div>
                       <p className="review-date">
                         Reviewed: {new Date(review.createdAt).toLocaleDateString('en-US', { 
@@ -390,14 +410,17 @@ function ReviewPage() {
                     </div>
                   </div>
                   <div className="review-rating" style={{ backgroundColor: getRatingColor(review.rating) }}>
-                    {review.rating.toFixed(1)}
+                    {review.bookingData?.originalScore || review.rating.toFixed(1)}
                   </div>
                 </div>
 
                 <div className="review-content">
+                  {review.bookingData?.headline && (
+                    <h4 className="review-headline">"{review.bookingData.headline}"</h4>
+                  )}
                   <p>{review.comment}</p>
                   
-                  {/* Show Booking.com specific data if available */}
+                  {/* Show Booking.com specific data */}
                   {review.bookingData && (
                     <div className="booking-details">
                       {review.bookingData.positiveText && (
@@ -412,6 +435,58 @@ function ReviewPage() {
                           <p>{review.bookingData.negativeText}</p>
                         </div>
                       )}
+
+                      {/* Category Scores */}
+                      {review.bookingData.scoring && (
+                        <div className="category-scores">
+                          <strong>Individual Ratings:</strong>
+                          <div className="score-grid">
+                            {review.bookingData.scoring.staff && (
+                              <div className="score-item">
+                                <span>Staff</span>
+                                {renderCategoryScore(review.bookingData.scoring.staff)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.clean && (
+                              <div className="score-item">
+                                <span>Cleanliness</span>
+                                {renderCategoryScore(review.bookingData.scoring.clean)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.location && (
+                              <div className="score-item">
+                                <span>Location</span>
+                                {renderCategoryScore(review.bookingData.scoring.location)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.facilities && (
+                              <div className="score-item">
+                                <span>Facilities</span>
+                                {renderCategoryScore(review.bookingData.scoring.facilities)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.value && (
+                              <div className="score-item">
+                                <span>Value</span>
+                                {renderCategoryScore(review.bookingData.scoring.value)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.comfort && (
+                              <div className="score-item">
+                                <span>Comfort</span>
+                                {renderCategoryScore(review.bookingData.scoring.comfort)}
+                              </div>
+                            )}
+                            {review.bookingData.scoring.wifi && (
+                              <div className="score-item">
+                                <span>WiFi</span>
+                                {renderCategoryScore(review.bookingData.scoring.wifi)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="booking-meta">
                         {review.bookingData.stayDate && (
                           <span>📅 Stayed: {new Date(review.bookingData.stayDate).toLocaleDateString()}</span>
@@ -426,6 +501,19 @@ function ReviewPage() {
                           <span>🌍 From: {review.bookingData.country}</span>
                         )}
                       </div>
+
+                      {/* Property Response */}
+                      {review.bookingData.propertyResponse && (
+                        <div className="property-response">
+                          <strong>🏨 Property Response:</strong>
+                          <p>{review.bookingData.propertyResponse}</p>
+                          {review.bookingData.responseDate && (
+                            <span className="response-date">
+                              Responded: {new Date(review.bookingData.responseDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
