@@ -104,12 +104,8 @@ function Dashboard() {
   };
 
   const handleEditReview = async (reviewId) => {
-    const { rating, comment } = editingReview[reviewId];
-    
-    if (!comment || comment.trim().length < 10) {
-      alert('Comment must be at least 10 characters');
-      return;
-    }
+    const editData = editingReview[reviewId];
+    if (!editData) return;
 
     const token = localStorage.getItem('token');
 
@@ -120,7 +116,10 @@ function Dashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ rating, comment })
+        body: JSON.stringify({
+          rating: editData.rating,
+          comment: editData.comment
+        })
       });
 
       const data = await response.json();
@@ -139,7 +138,6 @@ function Dashboard() {
 
   const handleEditReply = async (reviewId, replyId) => {
     const text = editingReply[replyId];
-    
     if (!text || !text.trim()) {
       alert('Reply cannot be empty');
       return;
@@ -222,6 +220,39 @@ function Dashboard() {
     }
   };
 
+  const handleChangeRole = async (userId, currentRole) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    
+    if (!window.confirm(`Change user role to ${newRole}?`)) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`User role changed to ${newRole} successfully!`);
+        fetchAdminData();
+      } else {
+        alert(data.message || 'Failed to change role');
+      }
+    } catch (error) {
+      console.error('Error changing role:', error);
+      alert('Error changing role');
+    }
+  };
+
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Delete this user and all their reviews?')) return;
 
@@ -254,22 +285,17 @@ function Dashboard() {
   };
 
   const getRatingColor = (rating) => {
-    if (rating >= 4.5) return '#0071c2';
-    if (rating >= 3.5) return '#008009';
-    if (rating >= 2.5) return '#ff8c00';
-    return '#cc0000';
+    if (rating >= 4.5) return '#10b981';
+    if (rating >= 3.5) return '#3b82f6';
+    if (rating >= 2.5) return '#f59e0b';
+    return '#ef4444';
   };
 
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} style={{ color: i <= rating ? '#FFD700' : '#ddd', fontSize: '16px' }}>
-          ★
-        </span>
-      );
-    }
-    return stars;
+  const getRatingLabel = (rating) => {
+    if (rating >= 4.5) return 'Excellent';
+    if (rating >= 3.5) return 'Good';
+    if (rating >= 2.5) return 'Average';
+    return 'Poor';
   };
 
   if (loading) {
@@ -284,11 +310,11 @@ function Dashboard() {
           <h1>👑 Admin Dashboard</h1>
           <div className="header-actions">
             <span className="admin-name">👤 {user?.name}</span>
-            <button onClick={() => navigate('/reviews')} className="view-reviews-btn">
-              View Public Reviews
+            <button onClick={() => navigate('/')} className="view-reviews-btn">
+              📝 View Reviews
             </button>
             <button onClick={handleLogout} className="logout-btn">
-              Logout
+              🚪 Logout
             </button>
           </div>
         </div>
@@ -323,45 +349,46 @@ function Dashboard() {
             {/* Statistics Cards */}
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
                   👥
                 </div>
                 <div className="stat-info">
-                  <h3>{stats.users.total}</h3>
+                  <h3>{stats.totalUsers}</h3>
                   <p>Total Users</p>
-                  <small>{stats.users.active} active</small>
+                  <small>{stats.activeUsers} active</small>
                 </div>
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' }}>
-                  📊
+                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+                  ⭐
                 </div>
                 <div className="stat-info">
-                  <h3>{stats.reviews.total}</h3>
+                  <h3>{stats.totalReviews}</h3>
                   <p>Total Reviews</p>
-                  <small>Avg: {stats.reviews.avgRating}/5</small>
+                  <small>Avg: {stats.averageRating.toFixed(1)} ⭐</small>
                 </div>
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' }}>
+                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
                   💬
                 </div>
                 <div className="stat-info">
-                  <h3>{stats.reviews.totalReplies}</h3>
+                  <h3>{stats.totalReplies}</h3>
                   <p>Total Replies</p>
+                  <small>Across all reviews</small>
                 </div>
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }}>
+                <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }}>
                   🔐
                 </div>
                 <div className="stat-info">
-                  <h3>{stats.users.totalLogins}</h3>
+                  <h3>{stats.totalLogins}</h3>
                   <p>Total Logins</p>
-                  <small>{stats.users.admins} admins</small>
+                  <small>Platform activity</small>
                 </div>
               </div>
             </div>
@@ -371,17 +398,13 @@ function Dashboard() {
               <div className="activity-section">
                 <h3>Recent Users</h3>
                 <div className="activity-list">
-                  {stats.recentActivity.users.map(u => (
+                  {stats.recentUsers.map((u) => (
                     <div key={u._id} className="activity-item">
                       <div className="activity-avatar">{u.name.charAt(0)}</div>
                       <div className="activity-details">
                         <strong>{u.name}</strong>
                         <p>{u.email}</p>
-                        <small>
-                          Joined: {new Date(u.createdAt).toLocaleDateString()} | 
-                          Logins: {u.loginCount} | 
-                          Role: {u.role}
-                        </small>
+                        <small>Joined {new Date(u.createdAt).toLocaleDateString()}</small>
                       </div>
                     </div>
                   ))}
@@ -391,17 +414,15 @@ function Dashboard() {
               <div className="activity-section">
                 <h3>Recent Reviews</h3>
                 <div className="activity-list">
-                  {stats.recentActivity.reviews.map(r => (
+                  {stats.recentReviews.map((r) => (
                     <div key={r._id} className="activity-item">
-                      <div className="activity-avatar">{r.name.charAt(0)}</div>
+                      <div className="activity-avatar" style={{ background: getRatingColor(r.rating) }}>
+                        {r.rating}
+                      </div>
                       <div className="activity-details">
                         <strong>{r.name}</strong>
-                        <div>{renderStars(r.rating)}</div>
-                        <p>{r.comment.substring(0, 100)}...</p>
-                        <small>
-                          {new Date(r.createdAt).toLocaleDateString()} | 
-                          Replies: {r.replies.length}
-                        </small>
+                        <p>{r.comment.substring(0, 60)}...</p>
+                        <small>{new Date(r.createdAt).toLocaleDateString()}</small>
                       </div>
                     </div>
                   ))}
@@ -415,8 +436,8 @@ function Dashboard() {
         {activeTab === 'reviews' && (
           <div className="reviews-section">
             <div className="section-header">
-              <h2>Manage Reviews ({reviews.length})</h2>
-              <p>Edit, reply to, and manage all customer reviews</p>
+              <h2>Reviews Management ({reviews.length})</h2>
+              <p>Edit, reply to, or delete reviews</p>
             </div>
 
             <div className="reviews-grid">
@@ -424,27 +445,22 @@ function Dashboard() {
                 <div key={review._id} className="review-card-admin">
                   <div className="review-header-admin">
                     <div className="reviewer-info">
-                      <div className="reviewer-avatar">
-                        {review.name.charAt(0).toUpperCase()}
-                      </div>
+                      <div className="reviewer-avatar">{review.name.charAt(0)}</div>
                       <div>
                         <h4>{review.name}</h4>
                         <p className="reviewer-email">{review.email}</p>
                         <p className="review-date">
-                          {new Date(review.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          {new Date(review.createdAt).toLocaleDateString()}
                           {review.isEdited && <span className="edited-badge"> (edited)</span>}
                         </p>
                       </div>
                     </div>
-                    <div className="review-rating-admin" style={{ backgroundColor: getRatingColor(review.rating) }}>
-                      <span className="rating-number">{review.rating.toFixed(1)}</span>
-                      {renderStars(review.rating)}
+                    <div 
+                      className="review-rating-admin" 
+                      style={{ background: getRatingColor(review.rating) }}
+                    >
+                      <span className="rating-number">{review.rating}</span>
+                      <small>{getRatingLabel(review.rating)}</small>
                     </div>
                   </div>
 
@@ -459,10 +475,10 @@ function Dashboard() {
                               ...editingReview,
                               [review._id]: { ...editingReview[review._id], rating: star }
                             })}
-                            style={{ 
-                              cursor: 'pointer', 
-                              fontSize: '30px',
-                              color: star <= editingReview[review._id].rating ? '#FFD700' : '#ddd'
+                            style={{
+                              fontSize: '32px',
+                              cursor: 'pointer',
+                              color: star <= editingReview[review._id].rating ? '#fbbf24' : '#d1d5db'
                             }}
                           >
                             ★
@@ -493,7 +509,9 @@ function Dashboard() {
                         <p>{review.comment}</p>
                       </div>
                       <button 
-                        onClick={() => setEditingReview({ [review._id]: { rating: review.rating, comment: review.comment } })}
+                        onClick={() => setEditingReview({ 
+                          [review._id]: { rating: review.rating, comment: review.comment } 
+                        })} 
                         className="edit-review-btn"
                       >
                         ✏️ Edit Review
@@ -619,13 +637,28 @@ function Dashboard() {
                       <td>{u.lastLogin ? new Date(u.lastLogin).toLocaleDateString() : 'Never'}</td>
                       <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td>
-                        <button 
-                          onClick={() => handleDeleteUser(u._id)}
-                          className="delete-user-btn"
-                          disabled={u._id === user._id}
-                        >
-                          🗑️
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button 
+                            onClick={() => handleChangeRole(u._id, u.role)}
+                            className="edit-review-btn"
+                            disabled={u._id === user._id}
+                            style={{ 
+                              padding: '8px 16px', 
+                              fontSize: '13px',
+                              opacity: u._id === user._id ? 0.5 : 1,
+                              cursor: u._id === user._id ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            🔄 {u.role === 'admin' ? 'Make User' : 'Make Admin'}
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteUser(u._id)}
+                            className="delete-user-btn"
+                            disabled={u._id === user._id}
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
