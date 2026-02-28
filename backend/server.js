@@ -21,10 +21,12 @@ mongoose.connect(MONGODB_URI)
 // Import Routes
 const authRoutes = require('./routes/auth');
 const reviewRoutes = require('./routes/reviews');
+const adminRoutes = require('./routes/admin');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

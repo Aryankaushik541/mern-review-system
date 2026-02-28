@@ -8,8 +8,9 @@ function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [user, setUser] = useState(null);
+  const [replyText, setReplyText] = useState({});
+  const [editingReply, setEditingReply] = useState({});
   const [filters, setFilters] = useState({
-    reviewers: 'all',
     scores: 'all',
     sortBy: 'recent'
   });
@@ -20,7 +21,7 @@ function ReviewPage() {
   });
 
   useEffect(() => {
-    // Check if user is logged in
+    // Check if user is logged in (optional for viewing)
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
@@ -55,14 +56,8 @@ function ReviewPage() {
       return;
     }
 
-    // Frontend validation
     if (!newReview.comment || newReview.comment.trim().length < 10) {
       alert('Comment must be at least 10 characters long');
-      return;
-    }
-
-    if (newReview.rating < 1 || newReview.rating > 5) {
-      alert('Rating must be between 1 and 5');
       return;
     }
 
@@ -84,7 +79,6 @@ function ReviewPage() {
         setNewReview({ rating: 5, comment: '' });
         fetchReviews();
       } else {
-        // Show detailed error message from backend
         alert(data.message || 'Failed to submit review');
       }
     } catch (error) {
@@ -93,20 +87,116 @@ function ReviewPage() {
     }
   };
 
+  const handleAddReply = async (reviewId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login to reply');
+      navigate('/login');
+      return;
+    }
+
+    const text = replyText[reviewId];
+    if (!text || !text.trim()) {
+      alert('Please enter a reply');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text: text.trim() })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setReplyText({ ...replyText, [reviewId]: '' });
+        fetchReviews();
+      } else {
+        alert(data.message || 'Failed to add reply');
+      }
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      alert('Error adding reply');
+    }
+  };
+
+  const handleEditReply = async (reviewId, replyId) => {
+    const token = localStorage.getItem('token');
+    const text = editingReply[replyId];
+    
+    if (!text || !text.trim()) {
+      alert('Reply cannot be empty');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}/reply/${replyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text: text.trim() })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEditingReply({});
+        fetchReviews();
+      } else {
+        alert(data.message || 'Failed to edit reply');
+      }
+    } catch (error) {
+      console.error('Error editing reply:', error);
+      alert('Error editing reply');
+    }
+  };
+
+  const handleDeleteReply = async (reviewId, replyId) => {
+    if (!window.confirm('Delete this reply?')) return;
+
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/reviews/${reviewId}/reply/${replyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        fetchReviews();
+      } else {
+        alert(data.message || 'Failed to delete reply');
+      }
+    } catch (error) {
+      console.error('Error deleting reply:', error);
+      alert('Error deleting reply');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setUser(null);
     navigate('/login');
   };
 
-  // Calculate statistics
   const calculateStats = () => {
     if (reviews.length === 0) return { avgRating: 0, categories: {} };
 
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
     const avgRating = (totalRating / reviews.length).toFixed(1);
 
-    // Mock category ratings (you can customize this based on your needs)
     const categories = {
       staff: (avgRating * 0.95).toFixed(1),
       facilities: (avgRating * 0.92).toFixed(1),
@@ -122,7 +212,6 @@ function ReviewPage() {
 
   const stats = calculateStats();
 
-  // Filter reviews
   const filteredReviews = reviews.filter(review => {
     if (filters.scores !== 'all') {
       const score = parseInt(filters.scores);
@@ -154,6 +243,18 @@ function ReviewPage() {
     return 'Poor';
   };
 
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      stars.push(
+        <span key={i} style={{ color: i <= rating ? '#FFD700' : '#ddd', fontSize: '20px' }}>
+          ★
+        </span>
+      );
+    }
+    return stars;
+  };
+
   const commentLength = newReview.comment.trim().length;
   const isCommentValid = commentLength >= 10;
 
@@ -167,6 +268,11 @@ function ReviewPage() {
             {user ? (
               <>
                 <span className="user-name">Welcome, {user.name}</span>
+                {user.role === 'admin' && (
+                  <button onClick={() => navigate('/dashboard')} className="admin-btn">
+                    Admin Dashboard
+                  </button>
+                )}
                 <button onClick={() => setShowReviewForm(true)} className="write-review-btn">
                   Write a Review
                 </button>
@@ -175,9 +281,14 @@ function ReviewPage() {
                 </button>
               </>
             ) : (
-              <button onClick={() => navigate('/login')} className="login-btn">
-                Login to Review
-              </button>
+              <>
+                <button onClick={() => navigate('/login')} className="login-btn">
+                  Login to Review
+                </button>
+                <button onClick={() => navigate('/signup')} className="signup-btn">
+                  Sign Up
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -192,6 +303,7 @@ function ReviewPage() {
             </div>
             <div className="rating-info">
               <h2>{getRatingText(stats.avgRating)}</h2>
+              <div className="stars-display">{renderStars(Math.round(stats.avgRating))}</div>
               <p>{reviews.length} reviews</p>
               <p className="real-reviews">We aim for 100% real reviews ⓘ</p>
             </div>
@@ -201,55 +313,15 @@ function ReviewPage() {
           <div className="categories-section">
             <h3>Categories:</h3>
             <div className="categories-grid">
-              <div className="category-item">
-                <span>Staff</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.staff / 5) * 100}%` }}></div>
+              {Object.entries(stats.categories).map(([key, value]) => (
+                <div key={key} className="category-item">
+                  <span>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</span>
+                  <div className="category-bar">
+                    <div className="bar-fill" style={{ width: `${(value / 5) * 100}%` }}></div>
+                  </div>
+                  <span className="category-score">{value}</span>
                 </div>
-                <span className="category-score">{stats.categories.staff}</span>
-              </div>
-              <div className="category-item">
-                <span>Facilities</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.facilities / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.facilities}</span>
-              </div>
-              <div className="category-item">
-                <span>Cleanliness</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.cleanliness / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.cleanliness}</span>
-              </div>
-              <div className="category-item">
-                <span>Comfort</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.comfort / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.comfort}</span>
-              </div>
-              <div className="category-item">
-                <span>Value for money</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.valueForMoney / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.valueForMoney}</span>
-              </div>
-              <div className="category-item">
-                <span>Location</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.location / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.location}</span>
-              </div>
-              <div className="category-item">
-                <span>Free WiFi</span>
-                <div className="category-bar">
-                  <div className="bar-fill" style={{ width: `${(stats.categories.freeWifi / 5) * 100}%` }}></div>
-                </div>
-                <span className="category-score">{stats.categories.freeWifi}</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -297,12 +369,14 @@ function ReviewPage() {
                     </div>
                     <div>
                       <h4>{review.name}</h4>
+                      <div className="stars-display">{renderStars(review.rating)}</div>
                       <p className="review-date">
                         Reviewed: {new Date(review.createdAt).toLocaleDateString('en-US', { 
                           year: 'numeric', 
                           month: 'long', 
                           day: 'numeric' 
                         })}
+                        {review.isEdited && <span className="edited-badge"> (edited)</span>}
                       </p>
                     </div>
                   </div>
@@ -313,13 +387,74 @@ function ReviewPage() {
                 <div className="review-content">
                   <p>{review.comment}</p>
                 </div>
-                {review.adminReply && (
-                  <div className="admin-reply">
-                    <strong>Admin Response:</strong>
-                    <p>{review.adminReply}</p>
-                    <span className="reply-date">
-                      {new Date(review.repliedAt).toLocaleDateString()}
-                    </span>
+
+                {/* Nested Replies Section */}
+                {review.replies && review.replies.length > 0 && (
+                  <div className="replies-section">
+                    <h4>💬 Replies ({review.replies.length})</h4>
+                    {review.replies.map((reply) => (
+                      <div key={reply._id} className={`reply-item ${reply.userRole === 'admin' ? 'admin-reply' : 'user-reply'}`}>
+                        <div className="reply-header">
+                          <div className="reply-author">
+                            <div className="reply-avatar">
+                              {reply.userName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <strong>{reply.userName}</strong>
+                              {reply.userRole === 'admin' && <span className="admin-badge">Admin</span>}
+                              <p className="reply-date">
+                                {new Date(reply.createdAt).toLocaleDateString()}
+                                {reply.isEdited && <span className="edited-badge"> (edited)</span>}
+                              </p>
+                            </div>
+                          </div>
+                          {user && (user._id === reply.userId || user.role === 'admin') && (
+                            <div className="reply-actions">
+                              <button onClick={() => setEditingReply({ ...editingReply, [reply._id]: reply.text })}>
+                                ✏️
+                              </button>
+                              <button onClick={() => handleDeleteReply(review._id, reply._id)}>
+                                🗑️
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {editingReply[reply._id] !== undefined ? (
+                          <div className="edit-reply-form">
+                            <textarea
+                              value={editingReply[reply._id]}
+                              onChange={(e) => setEditingReply({ ...editingReply, [reply._id]: e.target.value })}
+                              rows="2"
+                            />
+                            <div className="edit-actions">
+                              <button onClick={() => handleEditReply(review._id, reply._id)} className="save-btn">
+                                Save
+                              </button>
+                              <button onClick={() => setEditingReply({ ...editingReply, [reply._id]: undefined })} className="cancel-btn">
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="reply-text">{reply.text}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add Reply Form */}
+                {user && (
+                  <div className="add-reply-section">
+                    <textarea
+                      placeholder="Write a reply..."
+                      value={replyText[review._id] || ''}
+                      onChange={(e) => setReplyText({ ...replyText, [review._id]: e.target.value })}
+                      rows="2"
+                    />
+                    <button onClick={() => handleAddReply(review._id)} className="reply-btn">
+                      Reply
+                    </button>
                   </div>
                 )}
               </div>
@@ -336,20 +471,20 @@ function ReviewPage() {
             <form onSubmit={handleSubmitReview}>
               <div className="form-group">
                 <label>Rating: {newReview.rating}/5</label>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={newReview.rating}
-                  onChange={(e) => setNewReview({...newReview, rating: parseInt(e.target.value)})}
-                  className="rating-slider"
-                />
-                <div className="rating-labels">
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
+                <div className="star-rating-input">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      onClick={() => setNewReview({...newReview, rating: star})}
+                      style={{ 
+                        cursor: 'pointer', 
+                        fontSize: '40px',
+                        color: star <= newReview.rating ? '#FFD700' : '#ddd'
+                      }}
+                    >
+                      ★
+                    </span>
+                  ))}
                 </div>
               </div>
               <div className="form-group">
