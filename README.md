@@ -10,45 +10,67 @@ A complete full-stack review management system built with MongoDB, Express, Reac
 ```
 mern-review-system/
 ├── backend/                    # Backend Node.js/Express API
-│   ├── models/                 # MongoDB models
-│   ├── routes/                 # API routes
-│   ├── middleware/             # Authentication middleware
+│   ├── models/
+│   │   ├── User.js            # User model with authentication
+│   │   └── Review.js          # Review model
+│   ├── routes/
+│   │   ├── auth.js            # Authentication routes
+│   │   └── reviews.js         # Review CRUD routes
+│   ├── middleware/
+│   │   └── auth.js            # JWT authentication middleware
 │   ├── server.js              # Express server
 │   ├── package.json
-│   └── .env.example
+│   ├── .env.example
+│   └── README.md
 │
-├── client/                     # Frontend React App (use this)
+├── client/                     # Frontend React App
 │   ├── public/
+│   │   └── index.html
 │   ├── src/
-│   │   ├── pages/             # React pages
-│   │   ├── App.js
-│   │   └── index.js
+│   │   ├── pages/
+│   │   │   ├── Login.js       # Login page
+│   │   │   ├── Signup.js      # Signup page
+│   │   │   ├── ReviewPage.js  # User review page
+│   │   │   ├── Dashboard.js   # Admin dashboard
+│   │   │   ├── Auth.css
+│   │   │   ├── ReviewPage.css
+│   │   │   └── Dashboard.css
+│   │   ├── App.js             # Main app with routes
+│   │   ├── App.css
+│   │   ├── index.js
+│   │   └── index.css
 │   └── package.json
 │
-└── Documentation files
+└── Documentation
+    ├── README.md              # This file
+    ├── SETUP_GUIDE.md         # Hindi setup guide
+    ├── CHANGELOG.md           # All changes
+    └── LICENSE
 ```
 
 ## ✨ Features
 
 ### 🔐 Authentication System
-- User Registration & Login with JWT tokens
-- Role-Based Access Control (User & Admin)
-- Protected API routes
-- Password encryption with Bcrypt
+- **User Registration & Login** - Secure signup and login with JWT tokens
+- **Role-Based Access Control** - Separate user and admin roles
+- **Protected Routes** - Secure API endpoints with middleware
+- **Password Encryption** - Bcrypt hashing for secure password storage
 
 ### 👥 User Features
-- Modern Booking.com-inspired UI
-- Submit reviews with 1-5 star ratings
-- View all reviews with filters
-- Category-based ratings
-- Real-time statistics
+- Modern, responsive review interface
+- Submit reviews with ratings (1-5 stars)
+- View all reviews with filters and sorting
+- Category-based rating display
+- Real-time statistics and analytics
+- Beautiful gradient UI design
 
 ### 👨‍💼 Admin Features
-- Comprehensive dashboard
-- Review management
-- Reply to reviews
+- Comprehensive admin dashboard
+- Review management with statistics
+- Reply to customer reviews
 - Delete inappropriate reviews
-- Visual analytics
+- Track pending and replied reviews
+- Visual analytics with stat cards
 
 ## 🚀 Quick Setup
 
@@ -102,34 +124,40 @@ cd client
 npm start
 ```
 
+**Access:**
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:5000`
 
 ## 🔑 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user (Protected)
+```
+POST   /api/auth/register    - Register new user
+POST   /api/auth/login       - Login user
+GET    /api/auth/me          - Get current user (Protected)
+```
 
 ### Reviews
-- `GET /api/reviews` - Get all reviews
-- `POST /api/reviews` - Create review (Protected)
-- `PUT /api/reviews/:id/reply` - Add admin reply (Admin only)
-- `DELETE /api/reviews/:id` - Delete review (Admin only)
+```
+GET    /api/reviews          - Get all reviews
+GET    /api/reviews/:id      - Get single review
+POST   /api/reviews          - Create review (Protected - User)
+PUT    /api/reviews/:id/reply - Add admin reply (Protected - Admin)
+DELETE /api/reviews/:id      - Delete review (Protected - Admin)
+```
 
-## 📱 Usage
+## 📱 Usage Guide
 
 ### For Users:
-1. Sign up at `/signup` (select "User")
-2. Login at `/login`
-3. View and submit reviews at `/reviews`
+1. **Sign Up** - Navigate to `/signup`, select "User" as account type
+2. **Login** - Go to `/login` with your credentials
+3. **Submit Review** - Click "Write a Review", rate and submit
+4. **View Reviews** - Browse all reviews with filters
 
 ### For Admins:
-1. Sign up at `/signup` (select "Admin")
-2. Login at `/login`
-3. Access dashboard at `/admin/dashboard`
-4. Manage reviews, reply, and delete
+1. **Sign Up** - Navigate to `/signup`, select "Admin" as account type
+2. **Login** - Access admin dashboard at `/admin/dashboard`
+3. **Manage Reviews** - Reply to reviews, delete inappropriate content
 
 ## 🎨 Tech Stack
 
@@ -145,40 +173,52 @@ npm start
 - CSS3 with gradients
 - Fetch API
 
-## 🔒 Security
+## 🔒 Security Features
 
-- JWT authentication
-- Password hashing (bcrypt)
-- Protected routes
-- Role-based access
+- JWT token-based authentication
+- Password hashing with bcrypt
+- Protected API routes
+- Role-based access control
 - Input validation
-- Environment variables
+- Environment variables for sensitive data
 
 ## 📚 Documentation
 
-- **Backend README:** `backend/README.md`
-- **Setup Guide (Hindi):** `SETUP_GUIDE.md`
-- **Changelog:** `CHANGELOG.md`
+- **Backend README:** `backend/README.md` - Backend API documentation
+- **Setup Guide (Hindi):** `SETUP_GUIDE.md` - Detailed Hindi setup guide
+- **Changelog:** `CHANGELOG.md` - All updates and changes
 
 ## 🚧 Future Enhancements
 
-- Email verification
-- Password reset
-- Image uploads
-- Review voting
-- Analytics dashboard
-- Export to CSV/PDF
-- Dark mode
+- [ ] Email verification
+- [ ] Password reset functionality
+- [ ] Image upload for reviews
+- [ ] Review voting system
+- [ ] Advanced analytics dashboard
+- [ ] Export reviews to CSV/PDF
+- [ ] Multi-language support
+- [ ] Dark mode theme
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 👨‍💻 Author
 
 **Aryan Kaushik**
 - GitHub: [@Aryankaushik541](https://github.com/Aryankaushik541)
+- Repository: [mern-review-system](https://github.com/Aryankaushik541/mern-review-system)
 
 ## 📝 License
 
-MIT License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-⭐ Star this repo if you found it helpful!
+⭐ If you found this project helpful, please give it a star!
