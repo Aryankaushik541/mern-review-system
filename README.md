@@ -4,6 +4,7 @@ A complete review management system built with MongoDB, Express, React, and Node
 
 ![MERN Stack](https://img.shields.io/badge/Stack-MERN-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas-green)
 
 ## ✨ Features
 
@@ -28,7 +29,7 @@ A complete review management system built with MongoDB, Express, React, and Node
 ### Backend
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
-- **MongoDB** - Database
+- **MongoDB Atlas** - Cloud database
 - **Mongoose** - ODM for MongoDB
 - **CORS** - Cross-origin resource sharing
 
@@ -42,7 +43,7 @@ A complete review management system built with MongoDB, Express, React, and Node
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- MongoDB (local installation or MongoDB Atlas account)
+- MongoDB Atlas account (already configured)
 - npm or yarn
 
 ### Backend Setup
@@ -60,9 +61,11 @@ npm install
 
 3. Create a \`.env\` file in the root directory:
 \`\`\`env
-MONGODB_URI=mongodb://localhost:27017/review-system
+MONGODB_URI=mongodb+srv://aryankaushik541_db_user:wiA6zyP8cWjaq5Bu@cluster0.cikdgjg.mongodb.net/feedbackDB?retryWrites=true&w=majority
 PORT=5000
 \`\`\`
+
+**Note:** MongoDB Atlas is already configured and ready to use! The database name is `feedbackDB`.
 
 4. Start the backend server:
 \`\`\`bash
@@ -185,21 +188,24 @@ Admins can manage reviews, reply to users, and view statistics.
 Create a \`.env\` file in the root directory:
 
 \`\`\`env
-MONGODB_URI=your_mongodb_connection_string
+MONGODB_URI=mongodb+srv://aryankaushik541_db_user:wiA6zyP8cWjaq5Bu@cluster0.cikdgjg.mongodb.net/feedbackDB?retryWrites=true&w=majority
 PORT=5000
 \`\`\`
 
-For MongoDB Atlas:
-\`\`\`env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/review-system
-\`\`\`
+**Database Details:**
+- **Cluster:** cluster0.cikdgjg.mongodb.net
+- **Database Name:** feedbackDB
+- **User:** aryankaushik541_db_user
+- **Connection:** MongoDB Atlas (Cloud)
 
 ## 🚀 Deployment
 
 ### Backend Deployment (Heroku/Railway/Render)
-1. Set environment variables in your hosting platform
+1. Set environment variables in your hosting platform:
+   - \`MONGODB_URI\`: Use the MongoDB Atlas connection string
+   - \`PORT\`: 5000 (or platform default)
 2. Deploy the root directory
-3. Ensure MongoDB connection string is set
+3. MongoDB Atlas is already configured and accessible from anywhere
 
 ### Frontend Deployment (Vercel/Netlify)
 1. Build the React app: \`cd client && npm run build\`
@@ -218,10 +224,12 @@ This project is licensed under the MIT License.
 
 **Aryan Kaushik**
 - GitHub: [@Aryankaushik541](https://github.com/Aryankaushik541)
+- Email: aryankaushik541@gmail.com
 
 ## 🙏 Acknowledgments
 
 - Built with MERN Stack
+- MongoDB Atlas for cloud database
 - Inspired by modern review systems
 - UI design with gradient aesthetics
 
