@@ -2,22 +2,82 @@ const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
 const { auth, isAdmin } = require('../middleware/auth');
+const { fetchBookingReviews, mergeReviews, getBookingStats } = require('../utils/bookingApiService');
 
 // @route   GET /api/reviews
-// @desc    Get all reviews (PUBLIC - no login required)
+// @desc    Get all reviews (LOCAL + BOOKING.COM merged)
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const reviews = await Review.find()
+    // Fetch local reviews from database
+    const localReviews = await Review.find()
       .sort({ createdAt: -1 });
+
+    // Get hotel ID from environment or query parameter
+    const hotelId = process.env.BOOKING_HOTEL_ID || req.query.hotelId;
+
+    let allReviews = localReviews;
+    let bookingStats = null;
+
+    // If hotel ID is configured, fetch Booking.com reviews
+    if (hotelId) {
+      const bookingResult = await fetchBookingReviews(hotelId);
+      
+      if (bookingResult.success && bookingResult.data.length > 0) {
+        // Merge Booking.com reviews with local reviews
+        allReviews = mergeReviews(localReviews, bookingResult.data);
+        bookingStats = getBookingStats(bookingResult.data);
+      }
+    }
 
     res.json({
       success: true,
-      count: reviews.length,
-      data: reviews
+      count: allReviews.length,
+      data: allReviews,
+      stats: {
+        local: localReviews.length,
+        booking: bookingStats ? bookingStats.totalReviews : 0,
+        total: allReviews.length
+      },
+      bookingStats: bookingStats
     });
   } catch (error) {
     console.error('Error fetching reviews:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
+// @route   GET /api/reviews/booking/:hotelId
+// @desc    Get only Booking.com reviews for specific hotel
+// @access  Public
+router.get('/booking/:hotelId', async (req, res) => {
+  try {
+    const { hotelId } = req.params;
+    
+    const bookingResult = await fetchBookingReviews(hotelId);
+    
+    if (!bookingResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch Booking.com reviews',
+        error: bookingResult.error
+      });
+    }
+
+    const stats = getBookingStats(bookingResult.data);
+
+    res.json({
+      success: true,
+      count: bookingResult.data.length,
+      data: bookingResult.data,
+      stats: stats
+    });
+  } catch (error) {
+    console.error('Error fetching Booking.com reviews:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -90,6 +150,7 @@ router.post('/', auth, async (req, res) => {
       email: req.user.email,
       rating,
       comment,
+      source: 'local', // Mark as local review
       replies: []
     });
 
@@ -122,6 +183,14 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Review not found'
+      });
+    }
+
+    // Cannot edit Booking.com reviews
+    if (review.source === 'booking.com') {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot edit Booking.com reviews'
       });
     }
 
@@ -175,7 +244,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // @route   POST /api/reviews/:id/reply
-// @desc    Add a reply to a review (unlimited replies - Reddit/Facebook style)
+// @desc    Add a reply to a review (Works for BOTH local and Booking.com reviews)
 // @access  Private (Any logged-in user)
 router.post('/:id/reply', auth, async (req, res) => {
   try {
@@ -188,7 +257,28 @@ router.post('/:id/reply', auth, async (req, res) => {
       });
     }
 
-    const review = await Review.findById(req.params.id);
+    // For Booking.com reviews, we need to handle differently
+    // Check if this is a Booking.com review ID format
+    const reviewId = req.params.id;
+    
+    // Try to find in local database first
+    let review = await Review.findById(reviewId);
+
+    // If not found and looks like a Booking.com ID, create a placeholder
+    if (!review && reviewId.startsWith('booking_')) {
+      // Create a temporary review entry to store replies for Booking.com reviews
+      review = new Review({
+        _id: reviewId,
+        userId: 'booking_user',
+        name: 'Booking.com Guest',
+        email: 'booking@guest.com',
+        rating: 0,
+        comment: '[Booking.com Review - See original on Booking.com]',
+        source: 'booking.com',
+        externalId: reviewId,
+        replies: []
+      });
+    }
 
     if (!review) {
       return res.status(404).json({
@@ -338,7 +428,7 @@ router.delete('/:reviewId/reply/:replyId', auth, async (req, res) => {
 });
 
 // @route   DELETE /api/reviews/:id
-// @desc    Delete a review (Admin only)
+// @desc    Delete a review (Admin only, cannot delete Booking.com reviews)
 // @access  Private (Admin)
 router.delete('/:id', auth, isAdmin, async (req, res) => {
   try {
@@ -351,7 +441,15 @@ router.delete('/:id', auth, isAdmin, async (req, res) => {
       });
     }
 
-    await Review.findByIdAndDelete(req.params.id);
+    // Cannot delete Booking.com reviews
+    if (review.source === 'booking.com') {
+      return res.status(403).json({
+        success: false,
+        message: 'Cannot delete Booking.com reviews'
+      });
+    }
+
+    await review.deleteOne();
 
     res.json({
       success: true,
