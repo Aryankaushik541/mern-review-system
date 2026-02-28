@@ -1,0 +1,239 @@
+/* ========================================
+   BOOKING.COM SPECIFIC STYLES
+   ======================================== */
+
+/* Source Badge */
+.source-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+.source-badge.booking {
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 53, 128, 0.2);
+}
+
+.source-badge.local {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+/* Booking.com Details Section */
+.booking-details {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #003580;
+}
+
+.booking-feedback {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.booking-feedback.positive {
+  background: #d1fae5;
+  border-left: 3px solid #10b981;
+}
+
+.booking-feedback.negative {
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+}
+
+.booking-feedback strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.booking-feedback p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.booking-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.booking-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #6b7280;
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-state p {
+  font-size: 18px;
+  color: #6b7280;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state p {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+/* Login Prompt */
+.login-prompt {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.login-prompt p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #003580;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 14px;
+}
+
+.link-btn:hover {
+  color: #0057b8;
+}
+
+/* Reply Button Disabled State */
+.reply-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.reply-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design for Booking Details */
+@media (max-width: 768px) {
+  .booking-details {
+    padding: 15px;
+  }
+
+  .booking-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .booking-meta span {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .source-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 8px;
+    width: fit-content;
+  }
+}
+
+/* Enhanced Review Card for Booking.com */
+.review-card {
+  position: relative;
+}
+
+.review-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(135deg, #003580 0%, #0057b8 100%);
+  border-radius: 12px 0 0 12px;
+}
+
+/* Booking.com Branding */
+.review-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Stats Enhancement for Booking.com */
+.rating-summary {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #003580;
+}
+
+.overall-rating .rating-score {
+  box-shadow: 0 8px 24px rgba(0, 53, 128, 0.2);
+}
+
+/* Verified Badge */
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #10b981;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.verified-badge::before {
+  content: '✓';
+  font-weight: bold;
+}
