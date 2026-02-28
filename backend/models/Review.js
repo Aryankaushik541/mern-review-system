@@ -69,6 +69,28 @@ const reviewSchema = new mongoose.Schema({
     trim: true,
     minlength: [10, 'Comment must be at least 10 characters']
   },
+  // Source of the review (local or booking.com)
+  source: {
+    type: String,
+    enum: ['local', 'booking.com'],
+    default: 'local'
+  },
+  // External ID for Booking.com reviews
+  externalId: {
+    type: String,
+    default: null
+  },
+  // Additional Booking.com specific data
+  bookingData: {
+    originalScore: Number,
+    positiveText: String,
+    negativeText: String,
+    stayDate: Date,
+    reviewDate: Date,
+    roomType: String,
+    tripType: String,
+    country: String
+  },
   // Nested replies array (unlimited replies)
   replies: [replySchema],
   createdAt: {
