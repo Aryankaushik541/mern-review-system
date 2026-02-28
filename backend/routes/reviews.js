@@ -9,7 +9,6 @@ const { auth, isAdmin } = require('../middleware/auth');
 router.get('/', async (req, res) => {
   try {
     const reviews = await Review.find()
-      .populate('userId', 'name email')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -32,8 +31,7 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id)
-      .populate('userId', 'name email');
+    const review = await Review.findById(req.params.id);
 
     if (!review) {
       return res.status(404).json({
