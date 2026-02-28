@@ -25,6 +25,30 @@
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
+/* Genius Badge */
+.genius-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #003580;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.3);
+}
+
+/* Review Headline */
+.review-headline {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
 /* Booking.com Details Section */
 .booking-details {
   margin-top: 20px;
@@ -64,6 +88,55 @@
   line-height: 1.6;
 }
 
+/* Category Scores Grid */
+.category-scores {
+  margin-top: 20px;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.category-scores strong {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.score-item span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.category-score-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Booking Meta Information */
 .booking-meta {
   display: flex;
   flex-wrap: wrap;
@@ -83,6 +156,45 @@
   padding: 6px 12px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Property Response */
+.property-response {
+  margin-top: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+  border-radius: 8px;
+  border-left: 4px solid #0284c7;
+}
+
+.property-response strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #0c4a6e;
+}
+
+.property-response p {
+  margin: 0 0 8px 0;
+  color: #1e40af;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.response-date {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* Booking Score Note */
+.booking-score-note {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 5px;
+  font-weight: 500;
 }
 
 /* Loading State */
@@ -162,30 +274,6 @@
   box-shadow: none;
 }
 
-/* Responsive Design for Booking Details */
-@media (max-width: 768px) {
-  .booking-details {
-    padding: 15px;
-  }
-
-  .booking-meta {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .booking-meta span {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .source-badge {
-    display: block;
-    margin-left: 0;
-    margin-top: 8px;
-    width: fit-content;
-  }
-}
-
 /* Enhanced Review Card for Booking.com */
 .review-card {
   position: relative;
@@ -236,4 +324,147 @@
 .verified-badge::before {
   content: '✓';
   font-weight: bold;
+}
+
+/* Responsive Design for Booking Details */
+@media (max-width: 768px) {
+  .booking-details {
+    padding: 15px;
+  }
+
+  .booking-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .booking-meta span {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .source-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 8px;
+    width: fit-content;
+  }
+
+  .score-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .genius-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 5px;
+    width: fit-content;
+  }
+}
+
+/* Category Rating Bar Enhancement */
+.category-item .category-bar {
+  background: #e5e7eb;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex: 1;
+  margin: 0 12px;
+}
+
+.category-item .category-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #003580 0%, #0057b8 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Review Content Spacing */
+.review-content {
+  line-height: 1.8;
+}
+
+.review-content > p {
+  margin-bottom: 15px;
+}
+
+/* Hover Effects */
+.score-item:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.booking-feedback:hover {
+  transform: translateX(5px);
+  transition: all 0.2s ease;
+}
+
+/* Print Styles */
+@media print {
+  .header-actions,
+  .add-reply-section,
+  .reply-actions,
+  .login-prompt {
+    display: none;
+  }
+
+  .review-card {
+    page-break-inside: avoid;
+  }
+}
+
+/* Accessibility Improvements */
+.category-score-badge:focus,
+.link-btn:focus,
+.reply-btn:focus {
+  outline: 2px solid #003580;
+  outline-offset: 2px;
+}
+
+/* Animation for New Reviews */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Tooltip for Genius Badge */
+.genius-badge:hover::after {
+  content: 'Booking.com Genius Member';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  margin-bottom: 5px;
+  z-index: 1000;
+}
+
+/* Enhanced Category Scores */
+.category-scores {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Property Response Enhancement */
+.property-response {
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);
+}
+
+.property-response:hover {
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+  transition: all 0.2s ease;
 }
