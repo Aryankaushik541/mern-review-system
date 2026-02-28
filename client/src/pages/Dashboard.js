@@ -42,7 +42,20 @@ function Dashboard() {
       });
       const statsData = await statsRes.json();
       if (statsData.success) {
-        setStats(statsData.data);
+        // Transform nested structure to flat structure for easier access
+        const transformedStats = {
+          totalUsers: statsData.data.users?.total || 0,
+          activeUsers: statsData.data.users?.active || 0,
+          adminUsers: statsData.data.users?.admins || 0,
+          regularUsers: statsData.data.users?.regular || 0,
+          totalLogins: statsData.data.users?.totalLogins || 0,
+          totalReviews: statsData.data.reviews?.total || 0,
+          averageRating: statsData.data.reviews?.avgRating || 0,
+          totalReplies: statsData.data.reviews?.totalReplies || 0,
+          recentUsers: statsData.data.recentActivity?.users || [],
+          recentReviews: statsData.data.recentActivity?.reviews || []
+        };
+        setStats(transformedStats);
       }
 
       // Fetch all reviews
@@ -366,7 +379,7 @@ function Dashboard() {
                 <div className="stat-info">
                   <h3>{stats.totalReviews}</h3>
                   <p>Total Reviews</p>
-                  <small>Avg: {stats.averageRating.toFixed(1)} ⭐</small>
+                  <small>Avg: {stats.averageRating ? stats.averageRating.toFixed(1) : '0.0'} ⭐</small>
                 </div>
               </div>
 
@@ -398,34 +411,42 @@ function Dashboard() {
               <div className="activity-section">
                 <h3>Recent Users</h3>
                 <div className="activity-list">
-                  {stats.recentUsers.map((u) => (
-                    <div key={u._id} className="activity-item">
-                      <div className="activity-avatar">{u.name.charAt(0)}</div>
-                      <div className="activity-details">
-                        <strong>{u.name}</strong>
-                        <p>{u.email}</p>
-                        <small>Joined {new Date(u.createdAt).toLocaleDateString()}</small>
+                  {stats.recentUsers && stats.recentUsers.length > 0 ? (
+                    stats.recentUsers.map((u) => (
+                      <div key={u._id} className="activity-item">
+                        <div className="activity-avatar">{u.name.charAt(0)}</div>
+                        <div className="activity-details">
+                          <strong>{u.name}</strong>
+                          <p>{u.email}</p>
+                          <small>Joined {new Date(u.createdAt).toLocaleDateString()}</small>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>No recent users</p>
+                  )}
                 </div>
               </div>
 
               <div className="activity-section">
                 <h3>Recent Reviews</h3>
                 <div className="activity-list">
-                  {stats.recentReviews.map((r) => (
-                    <div key={r._id} className="activity-item">
-                      <div className="activity-avatar" style={{ background: getRatingColor(r.rating) }}>
-                        {r.rating}
+                  {stats.recentReviews && stats.recentReviews.length > 0 ? (
+                    stats.recentReviews.map((r) => (
+                      <div key={r._id} className="activity-item">
+                        <div className="activity-avatar" style={{ background: getRatingColor(r.rating) }}>
+                          {r.rating}
+                        </div>
+                        <div className="activity-details">
+                          <strong>{r.name}</strong>
+                          <p>{r.comment.substring(0, 60)}...</p>
+                          <small>{new Date(r.createdAt).toLocaleDateString()}</small>
+                        </div>
                       </div>
-                      <div className="activity-details">
-                        <strong>{r.name}</strong>
-                        <p>{r.comment.substring(0, 60)}...</p>
-                        <small>{new Date(r.createdAt).toLocaleDateString()}</small>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>No recent reviews</p>
+                  )}
                 </div>
               </div>
             </div>
