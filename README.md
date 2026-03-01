@@ -1,71 +1,54 @@
-# 🌟 Premium MERN Review System
+# 🌟 MERN Review System - Backend
 
-A professional, full-featured review management system built with the MERN stack, designed with a premium Booking.com-inspired interface. Perfect for hotels, restaurants, services, or any business needing customer reviews.
+**Backend API** for a professional, full-featured review management system built with Node.js, Express, and MongoDB. Designed with a premium Booking.com-inspired interface.
+
+> **Note:** Frontend has been moved to a separate repository: [mern-review-system-frontend](https://github.com/Aryankaushik541/mern-review-system-frontend)
 
 ![MERN Stack](https://img.shields.io/badge/Stack-MERN-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
 
-## ✨ Key Features
+## 📦 Repositories
 
-### 🎯 **Public Review Dashboard**
-- ✅ **No login required** to view reviews
-- ✅ Browse all customer reviews freely
-- ✅ Filter by rating and sort options
-- ✅ Beautiful Booking.com-style interface
+- **Backend (this repo):** https://github.com/Aryankaushik541/mern-review-system
+- **Frontend:** https://github.com/Aryankaushik541/mern-review-system-frontend
 
-### ⭐ **Star Rating System**
-- ✅ Visual 5-star rating display
-- ✅ Interactive star selection
-- ✅ Color-coded ratings (Excellent, Good, Average, Poor)
-- ✅ Category-wise ratings breakdown
+## ✨ Backend Features
 
-### 💬 **Nested Comments (Reddit/Facebook Style)**
-- ✅ **Unlimited replies** on any review
-- ✅ Threaded conversations
-- ✅ Edit and delete your own replies
-- ✅ Admin can manage all replies
-- ✅ Visual distinction for admin vs user replies
-- ✅ Timestamps and "edited" indicators
+### 🔐 Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (Admin/User)
+- Password hashing with bcrypt
+- Login activity tracking
+- Secure password reset with email
 
-### 👑 **Premium Admin Dashboard**
+### ⭐ Review Management
+- CRUD operations for reviews
+- Star rating system (1-5 stars)
+- Category-wise ratings
+- Booking.com integration support
+- Review editing with history tracking
 
-#### **Overview Tab** 📊
-- Total users, active users, admins
-- Total reviews and average rating
-- Total replies across platform
-- Login statistics
-- Recent activity feeds
+### 💬 Nested Comments System
+- Unlimited reply depth
+- Edit and delete replies
+- Admin moderation capabilities
+- Timestamp tracking
+- User/Admin distinction
 
-#### **Reviews Management** ⭐
-- View all reviews with full details
-- Edit any review (rating + comment)
-- Unlimited reply capability
-- Edit/delete any reply
-- Visual star ratings
-- Edited indicators
-
-#### **User Management** 👥
-- Complete user information table
-- View login counts and activity
-- Active/inactive status
-- Delete users
+### 👑 Admin Features
+- Complete dashboard statistics
+- User management (view, update, delete)
+- Review moderation
+- Activity analytics
 - Role management
 
-### 📈 **Activity Tracking**
-- Login count per user
-- Last login timestamp
-- Active/inactive user status
-- Total platform analytics
-
-## 🎨 Design Highlights
-
-- **Booking.com-inspired** premium interface
-- **Gradient backgrounds** and modern shadows
-- **Smooth animations** and transitions
-- **Responsive design** for all devices
-- **Color-coded ratings** for quick insights
-- **Professional typography** and spacing
+### 📊 Analytics & Statistics
+- Total users, reviews, replies
+- Average ratings calculation
+- Category-wise score aggregation
+- Login tracking
+- Recent activity feeds
 
 ## 🚀 Quick Start
 
@@ -84,18 +67,26 @@ cd mern-review-system
 # Backend setup
 cd backend
 npm install
-npm start
 
-# Frontend setup (new terminal)
-cd client
-npm install
+# Configure environment (already set up)
+# Edit .env if needed for your MongoDB connection
+
+# Start server
 npm start
 ```
 
-**That's it!** Environment files are already configured. 
+**Backend runs on:** `http://localhost:5000`
 
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:5000`
+### Frontend Setup
+
+Clone and set up the frontend separately:
+
+```bash
+git clone https://github.com/Aryankaushik541/mern-review-system-frontend.git
+cd mern-review-system-frontend
+npm install
+npm start
+```
 
 ## 📁 Project Structure
 
@@ -111,70 +102,26 @@ mern-review-system/
 │   │   └── admin.js         # Admin management routes
 │   ├── middleware/
 │   │   └── auth.js          # JWT authentication
-│   ├── .env                 # Environment variables (configured)
+│   ├── .env                 # Environment variables
+│   ├── .env.example         # Environment template
 │   └── server.js            # Express server
 │
-├── client/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── ReviewPage.js    # Public review page
-│   │   │   ├── Dashboard.js     # Admin dashboard
-│   │   │   ├── Login.js         # Login page
-│   │   │   └── Signup.js        # Signup page
-│   │   └── App.js
-│   └── .env                 # Frontend config (configured)
-│
+├── EMAIL_SETUP_GUIDE.md     # Email configuration guide
 ├── SETUP_GUIDE.md           # Detailed setup instructions
 ├── UPGRADE_GUIDE.md         # Feature documentation
+├── FORGOT_PASSWORD_FEATURE.md # Password reset guide
 └── README.md                # This file
 ```
 
 ## 🔧 Technology Stack
 
-### Backend
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **MongoDB** - Database
 - **Mongoose** - ODM
 - **JWT** - Authentication
 - **bcrypt** - Password hashing
-
-### Frontend
-- **React** - UI library
-- **React Router** - Navigation
-- **CSS3** - Styling (Booking.com design)
-- **Fetch API** - HTTP requests
-
-## 🎯 Usage Guide
-
-### For Visitors (No Login Required)
-1. Visit the homepage
-2. Browse all reviews
-3. Filter by rating
-4. Sort by date or rating
-
-### For Users
-1. **Sign Up** - Create an account
-2. **Login** - Access your account
-3. **Write Review** - Submit reviews with star ratings
-4. **Reply** - Engage in conversations
-5. **Edit/Delete** - Manage your replies
-
-### For Admins
-1. **Login** - Use admin credentials
-2. **Dashboard** - Access admin panel
-3. **Overview** - View statistics
-4. **Manage Reviews** - Edit, reply, delete
-5. **Manage Users** - View and control users
-
-## 🔐 Security Features
-
-- ✅ JWT authentication
-- ✅ Password hashing with bcrypt
-- ✅ Role-based access control
-- ✅ Input validation
-- ✅ Protected admin routes
-- ✅ Secure environment variables
+- **Nodemailer** - Email service
 
 ## 📊 API Endpoints
 
@@ -182,12 +129,19 @@ mern-review-system/
 ```
 GET  /api/reviews           # Get all reviews
 GET  /api/reviews/:id       # Get single review
+GET  /api/reviews/:id/replies # Get review replies
+```
+
+### Authentication Routes
+```
+POST /api/auth/signup       # Register user
+POST /api/auth/login        # Login user
+POST /api/auth/forgot-password # Request password reset
+POST /api/auth/reset-password/:token # Reset password
 ```
 
 ### User Routes (Auth Required)
 ```
-POST /api/auth/signup       # Register user
-POST /api/auth/login        # Login user
 POST /api/reviews           # Create review
 POST /api/reviews/:id/reply # Add reply
 PUT  /api/reviews/:id       # Edit own review
@@ -200,42 +154,77 @@ DELETE /api/reviews/:reviewId/reply/:replyId # Delete own reply
 GET    /api/admin/stats     # Dashboard statistics
 GET    /api/admin/users     # All users
 GET    /api/admin/users/:id # User details
-PUT    /api/admin/users/:id # Update user
+PUT    /api/admin/users/:id # Update user (role change)
 DELETE /api/admin/users/:id # Delete user
 GET    /api/admin/reviews   # All reviews
 PUT    /api/reviews/:id     # Edit any review
 DELETE /api/reviews/:id     # Delete any review
 ```
 
+## 🔐 Environment Variables
+
+Create a `.env` file in the `backend` directory:
+
+```env
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# MongoDB Connection
+MONGODB_URI=your_mongodb_connection_string
+
+# JWT Secret
+JWT_SECRET=your_jwt_secret_key
+
+# Email Configuration (for password reset)
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+EMAIL_FROM=noreply@yourapp.com
+
+# Frontend URL (for CORS and email links)
+FRONTEND_URL=http://localhost:3000
+```
+
+See `.env.example` for a template.
+
 ## 🌐 Deployment
 
-### Backend (Render/Heroku)
+### Backend Deployment (Render/Heroku)
+
 1. Create account on [Render](https://render.com/)
 2. Connect GitHub repository
-3. Set environment variables
+3. Set environment variables:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+   - `EMAIL_USER`
+   - `EMAIL_PASS`
+   - `FRONTEND_URL`
 4. Deploy
 
-### Frontend (Vercel/Netlify)
-1. Create account on [Vercel](https://vercel.com/)
-2. Connect GitHub repository
-3. Set `REACT_APP_API_URL` to backend URL
-4. Deploy
+### Frontend Deployment
 
-**Detailed deployment guide:** See `SETUP_GUIDE.md`
+See the [frontend repository](https://github.com/Aryankaushik541/mern-review-system-frontend) for deployment instructions.
 
-## 📸 Screenshots
+## 🔒 Security Features
 
-### Public Review Page
-- Premium Booking.com-style interface
-- Star ratings and category breakdown
-- Filter and sort options
-- Nested comment threads
+- ✅ JWT authentication
+- ✅ Password hashing with bcrypt (10 rounds)
+- ✅ Role-based access control
+- ✅ Input validation
+- ✅ Protected admin routes
+- ✅ Secure environment variables
+- ✅ CORS configuration
+- ✅ Password reset tokens with expiration
 
-### Admin Dashboard
-- Overview with statistics
-- Reviews management interface
-- User management table
-- Premium design throughout
+## 📧 Email Setup
+
+For password reset functionality, configure email settings:
+
+1. Use Gmail or any SMTP service
+2. Generate app-specific password
+3. Update `.env` with credentials
+
+See `EMAIL_SETUP_GUIDE.md` for detailed instructions.
 
 ## 🤝 Contributing
 
@@ -255,37 +244,31 @@ This project is licensed under the MIT License.
 
 **Aryan Kaushik**
 - GitHub: [@Aryankaushik541](https://github.com/Aryankaushik541)
-- Email: aryankaushik541@gmail.com
-
-## 🙏 Acknowledgments
-
-- Design inspired by Booking.com
-- Built with MERN stack
-- Icons and emojis for better UX
 
 ## 📞 Support
 
 For issues or questions:
 1. Check `SETUP_GUIDE.md`
 2. Review `UPGRADE_GUIDE.md`
-3. Open a GitHub Issue
-4. Contact: aryankaushik541@gmail.com
+3. Check `EMAIL_SETUP_GUIDE.md` for email issues
+4. Open a GitHub Issue
 
 ## 🎉 Features Summary
 
-✅ Public review viewing (no login)
-✅ Star rating system (5 stars)
-✅ Unlimited nested comments
-✅ Complete admin dashboard
+✅ JWT Authentication
+✅ Role-based access control
+✅ Star rating system
+✅ Nested comments/replies
+✅ Admin dashboard API
 ✅ User management
 ✅ Activity tracking
-✅ Premium Booking.com design
-✅ Fully responsive
+✅ Password reset via email
+✅ Booking.com integration support
 ✅ Production ready
 ✅ Easy deployment
 
 ---
 
-**Made with ❤️ using MERN Stack**
+**Made with ❤️ using Node.js, Express & MongoDB**
 
 **Ready for production deployment!** 🚀
