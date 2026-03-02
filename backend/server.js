@@ -43,12 +43,14 @@ connectDB();
 const authRoutes = require('./routes/auth');
 const reviewRoutes = require('./routes/reviews');
 const adminRoutes = require('./routes/admin');
+const testEmailRoutes = require('./routes/test-email');
 const { isEmailConfigured } = require('./utils/emailService');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/test-email', testEmailRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -85,6 +87,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       emailConfig: '/api/config/email',
+      testEmail: '/api/test-email',
       auth: '/api/auth',
       reviews: '/api/reviews',
       admin: '/api/admin'
