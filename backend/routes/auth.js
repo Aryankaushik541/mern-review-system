@@ -131,7 +131,7 @@ router.post('/login', async (req, res) => {
 });
 
 // @route   POST /api/auth/forgot-password
-// @desc    Send password reset email
+// @desc    Send password reset email (or return token if email not configured)
 // @access  Public
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -166,54 +166,39 @@ router.post('/forgot-password', async (req, res) => {
 
     console.log('🔑 Reset token generated for user:', user.email);
 
-    // Check if email is configured
-    if (!isEmailConfigured()) {
-      console.log('⚠️ Email service not configured');
-      return res.json({
-        success: true,
-        message: 'Password reset token generated successfully.',
-        warning: 'Email service is not configured. Please contact administrator for password reset.',
-        // Only show token in development
-        ...(process.env.NODE_ENV === 'development' && { resetToken })
-      });
-    }
+    // Build reset URL
+    const frontendUrl = process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
-    // Try to send password reset email
-    try {
-      console.log('📤 Attempting to send email to:', user.email);
-      const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
+    // Try to send email if configured
+    if (isEmailConfigured()) {
+      try {
+        console.log('📤 Attempting to send email to:', user.email);
+        const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
-      console.log('📧 Email send result:', emailResult);
-
-      if (!emailResult.success) {
-        console.error('❌ Email service error:', emailResult.error);
-        
-        return res.json({
-          success: true,
-          message: 'Password reset requested.',
-          warning: 'Email delivery is currently experiencing issues. Please try again later or contact support.',
-          // Only show token in development
-          ...(process.env.NODE_ENV === 'development' && { resetToken })
-        });
+        if (emailResult.success) {
+          console.log('✅ Password reset email sent successfully');
+          return res.json({
+            success: true,
+            message: 'Password reset link has been sent to your email.'
+          });
+        } else {
+          console.error('❌ Email service error:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('❌ Email sending failed:', emailError);
       }
-
-      console.log('✅ Password reset email sent successfully');
-      res.json({
-        success: true,
-        message: 'Password reset link has been sent to your email.'
-      });
-    } catch (emailError) {
-      console.error('❌ Email sending failed:', emailError);
-      
-      // Still return success to not reveal if user exists
-      res.json({
-        success: true,
-        message: 'Password reset requested.',
-        warning: 'Email service is currently unavailable. Please try again later.',
-        // Only show token in development
-        ...(process.env.NODE_ENV === 'development' && { resetToken })
-      });
     }
+
+    // If email not configured or failed, return success with instructions
+    console.log('⚠️ Email not sent, returning reset URL');
+    return res.json({
+      success: true,
+      message: 'Password reset link generated. Email service is currently unavailable.',
+      resetUrl: resetUrl,
+      instructions: 'Copy this link and paste it in your browser to reset your password.',
+      note: 'This link will expire in 10 minutes.'
+    });
 
   } catch (error) {
     console.error('❌ Forgot password error:', error);
@@ -232,6 +217,8 @@ router.post('/reset-password/:token', async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
+
+    console.log('🔐 Reset password request with token');
 
     if (!password || password.length < 6) {
       return res.status(400).json({
@@ -253,17 +240,22 @@ router.post('/reset-password/:token', async (req, res) => {
     });
 
     if (!user) {
+      console.log('❌ Invalid or expired token');
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired password reset token'
       });
     }
 
+    console.log('✅ Valid token found for user:', user.email);
+
     // Set new password
     user.password = password;
     user.resetPasswordToken = null;
     user.resetPasswordExpires = null;
     await user.save();
+
+    console.log('✅ Password reset successful for:', user.email);
 
     // Send confirmation email (don't wait for it)
     if (isEmailConfigured()) {
@@ -278,7 +270,7 @@ router.post('/reset-password/:token', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Reset password error:', error);
+    console.error('❌ Reset password error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error. Please try again later.',
