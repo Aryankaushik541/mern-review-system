@@ -1,20 +1,40 @@
 const nodemailer = require('nodemailer');
 
+// Check if email is configured
+const isEmailConfigured = () => {
+  return !!(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
+};
+
 // Create reusable transporter
 const createTransporter = () => {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD
-    }
-  });
+  if (!isEmailConfigured()) {
+    console.warn('⚠️ Email not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD in environment variables.');
+    return null;
+  }
+
+  try {
+    return nodemailer.createTransporter({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_APP_PASSWORD
+      }
+    });
+  } catch (error) {
+    console.error('Error creating email transporter:', error);
+    return null;
+  }
 };
 
 // Send welcome email on signup
 const sendWelcomeEmail = async (userEmail, userName) => {
   try {
     const transporter = createTransporter();
+    
+    if (!transporter) {
+      console.log('📧 Email not configured - skipping welcome email');
+      return { success: false, error: 'Email service not configured' };
+    }
     
     const mailOptions = {
       from: `"Review System" <${process.env.EMAIL_USER}>`,
@@ -52,7 +72,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
               
               <p>Get started by logging in and sharing your first review!</p>
               
-              <a href="${process.env.CLIENT_URL}/login" class="button">Login Now</a>
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="button">Login Now</a>
               
               <p>If you have any questions, feel free to reach out to us.</p>
               
@@ -69,10 +89,10 @@ const sendWelcomeEmail = async (userEmail, userName) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Welcome email sent to:', userEmail);
+    console.log('✅ Welcome email sent to:', userEmail);
     return { success: true };
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    console.error('❌ Error sending welcome email:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -81,7 +101,16 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
   try {
     const transporter = createTransporter();
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    
+    if (!transporter) {
+      console.log('📧 Email not configured - cannot send password reset email');
+      return { 
+        success: false, 
+        error: 'Email service is not configured. Please contact administrator.' 
+      };
+    }
+    
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
     
     const mailOptions = {
       from: `"Review System" <${process.env.EMAIL_USER}>`,
@@ -139,10 +168,10 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent to:', userEmail);
+    console.log('✅ Password reset email sent to:', userEmail);
     return { success: true };
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error('❌ Error sending password reset email:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -151,6 +180,11 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
 const sendPasswordResetConfirmation = async (userEmail, userName) => {
   try {
     const transporter = createTransporter();
+    
+    if (!transporter) {
+      console.log('📧 Email not configured - skipping confirmation email');
+      return { success: false, error: 'Email service not configured' };
+    }
     
     const mailOptions = {
       from: `"Review System" <${process.env.EMAIL_USER}>`,
@@ -180,7 +214,7 @@ const sendPasswordResetConfirmation = async (userEmail, userName) => {
               
               <p>You can now login with your new password.</p>
               
-              <a href="${process.env.CLIENT_URL}/login" class="button">Login Now</a>
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="button">Login Now</a>
               
               <p><strong>⚠️ Security Notice:</strong><br>
               If you didn't make this change, please contact us immediately.</p>
@@ -198,10 +232,10 @@ const sendPasswordResetConfirmation = async (userEmail, userName) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Password reset confirmation sent to:', userEmail);
+    console.log('✅ Password reset confirmation sent to:', userEmail);
     return { success: true };
   } catch (error) {
-    console.error('Error sending confirmation email:', error);
+    console.error('❌ Error sending confirmation email:', error.message);
     return { success: false, error: error.message };
   }
 };
@@ -209,5 +243,6 @@ const sendPasswordResetConfirmation = async (userEmail, userName) => {
 module.exports = {
   sendWelcomeEmail,
   sendPasswordResetEmail,
-  sendPasswordResetConfirmation
+  sendPasswordResetConfirmation,
+  isEmailConfigured
 };
