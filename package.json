@@ -1,0 +1,23 @@
+{
+  "name": "mern-review-system",
+  "version": "1.0.0",
+  "description": "MERN Stack Review System - Backend API",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "cd backend && npm run dev",
+    "install-backend": "cd backend && npm install",
+    "build": "cd backend && npm install"
+  },
+  "keywords": [
+    "mern",
+    "review-system",
+    "backend",
+    "api"
+  ],
+  "author": "Aryan Kaushik",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
