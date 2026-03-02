@@ -9,8 +9,8 @@ const isEmailConfigured = () => {
   return configured;
 };
 
-// Create reusable transporter with better error handling
-const createTransporter = () => {
+// Create and verify transporter
+const createTransporter = async () => {
   if (!isEmailConfigured()) {
     return null;
   }
@@ -19,29 +19,33 @@ const createTransporter = () => {
     // Remove any spaces from password
     const cleanPassword = process.env.EMAIL_APP_PASSWORD.replace(/\s/g, '');
     
+    console.log('📧 Creating email transporter...');
+    console.log('📧 Email User:', process.env.EMAIL_USER);
+    console.log('📧 Password Length:', cleanPassword.length);
+    
     const transporter = nodemailer.createTransporter({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
         pass: cleanPassword
       },
-      // Add timeout and retry settings
-      pool: true,
-      maxConnections: 1,
-      rateDelta: 20000,
-      rateLimit: 5
+      // Add timeout settings
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
     });
 
-    // Verify transporter configuration
-    transporter.verify((error, success) => {
-      if (error) {
-        console.error('❌ Email transporter verification failed:', error.message);
-      } else {
-        console.log('✅ Email service is ready to send messages');
-      }
-    });
+    // Verify connection
+    try {
+      await transporter.verify();
+      console.log('✅ Email transporter verified successfully');
+      return transporter;
+    } catch (verifyError) {
+      console.error('❌ Email transporter verification failed:', verifyError.message);
+      console.error('❌ Full error:', verifyError);
+      return null;
+    }
 
-    return transporter;
   } catch (error) {
     console.error('❌ Error creating email transporter:', error.message);
     return null;
@@ -51,7 +55,7 @@ const createTransporter = () => {
 // Send welcome email on signup
 const sendWelcomeEmail = async (userEmail, userName) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     
     if (!transporter) {
       console.log('📧 Email not configured - skipping welcome email');
@@ -115,6 +119,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending welcome email:', error.message);
+    console.error('❌ Full error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -122,13 +127,15 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 // Send password reset email
 const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
   try {
-    const transporter = createTransporter();
+    console.log('📧 Starting password reset email process...');
+    
+    const transporter = await createTransporter();
     
     if (!transporter) {
-      console.log('📧 Email not configured - cannot send password reset email');
+      console.log('📧 Email transporter not available');
       return { 
         success: false, 
-        error: 'Email service is not configured. Please contact administrator.' 
+        error: 'Email service is not configured or verification failed.' 
       };
     }
     
@@ -192,12 +199,17 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
       `
     };
 
+    console.log('📧 Attempting to send email...');
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Password reset email sent to:', userEmail, '| Message ID:', info.messageId);
+    console.log('✅ Password reset email sent successfully!');
+    console.log('✅ Message ID:', info.messageId);
+    console.log('✅ Response:', info.response);
+    
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending password reset email:', error.message);
-    console.error('❌ Error details:', error);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Full error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -205,7 +217,7 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
 // Send password reset confirmation email
 const sendPasswordResetConfirmation = async (userEmail, userName) => {
   try {
-    const transporter = createTransporter();
+    const transporter = await createTransporter();
     
     if (!transporter) {
       console.log('📧 Email not configured - skipping confirmation email');
