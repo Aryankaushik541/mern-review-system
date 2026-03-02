@@ -43,6 +43,7 @@ connectDB();
 const authRoutes = require('./routes/auth');
 const reviewRoutes = require('./routes/reviews');
 const adminRoutes = require('./routes/admin');
+const { isEmailConfigured } = require('./utils/emailService');
 
 // Use Routes
 app.use('/api/auth', authRoutes);
@@ -51,7 +52,28 @@ app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Server is running' });
+  res.json({ 
+    success: true, 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Email configuration check
+app.get('/api/config/email', (req, res) => {
+  const emailConfigured = isEmailConfigured();
+  res.json({
+    success: true,
+    emailConfigured,
+    message: emailConfigured 
+      ? 'Email service is configured and ready' 
+      : 'Email service is not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD environment variables.',
+    config: {
+      EMAIL_USER: process.env.EMAIL_USER ? '✅ Set' : '❌ Not set',
+      EMAIL_APP_PASSWORD: process.env.EMAIL_APP_PASSWORD ? '✅ Set' : '❌ Not set',
+      FRONTEND_URL: process.env.FRONTEND_URL || 'Not set (using default)'
+    }
+  });
 });
 
 // Root route
@@ -59,11 +81,21 @@ app.get('/', (req, res) => {
   res.json({ 
     success: true, 
     message: 'MERN Review System API',
+    version: '2.0.0',
     endpoints: {
       health: '/api/health',
+      emailConfig: '/api/config/email',
       auth: '/api/auth',
       reviews: '/api/reviews',
       admin: '/api/admin'
+    },
+    features: {
+      authentication: '✅ JWT-based auth',
+      reviews: '✅ CRUD operations',
+      nestedComments: '✅ Unlimited depth',
+      starRatings: '✅ 1-5 stars',
+      adminDashboard: '✅ Full management',
+      emailService: isEmailConfigured() ? '✅ Configured' : '⚠️ Not configured'
     }
   });
 });
@@ -76,5 +108,6 @@ if (process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`📧 Email service: ${isEmailConfigured() ? '✅ Configured' : '⚠️ Not configured'}`);
   });
 }
