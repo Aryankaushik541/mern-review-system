@@ -99,6 +99,8 @@ mern-review-system/
 │   ├── .env.example         # Environment template
 │   ├── package.json         # Dependencies
 │   └── server.js            # Express server entry point
+├── vercel.json              # Vercel deployment config
+├── package.json             # Root package.json
 ├── .gitignore
 ├── LICENSE
 └── README.md                # This file
@@ -122,6 +124,8 @@ mern-review-system/
 GET  /api/reviews              # Get all reviews
 GET  /api/reviews/:id          # Get single review
 GET  /api/reviews/:id/replies  # Get review replies
+GET  /api/health               # Health check
+GET  /                         # API info
 ```
 
 ### Authentication Routes
@@ -181,6 +185,37 @@ See `.env.example` for a complete template.
 
 ## 🌐 Deployment
 
+### Deploy to Vercel (Recommended for Serverless)
+
+1. **Push to GitHub** (already done)
+
+2. **Vercel Dashboard:**
+   - Go to [vercel.com](https://vercel.com/)
+   - Click "Add New Project"
+   - Import `mern-review-system` repository
+   - Framework Preset: **Other**
+   - Root Directory: `./`
+   - Build Command: Leave empty or `npm install`
+   - Output Directory: Leave empty
+
+3. **Environment Variables** (Add in Vercel):
+   ```
+   MONGODB_URI=your_mongodb_atlas_uri
+   JWT_SECRET=your_jwt_secret_key
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+   FRONTEND_URL=https://your-frontend.vercel.app
+   NODE_ENV=production
+   ```
+
+4. **Deploy!**
+
+**Important Notes for Vercel:**
+- ✅ `vercel.json` is already configured
+- ✅ Server.js is serverless-ready
+- ✅ MongoDB connection is optimized for serverless
+- ✅ All routes work with Vercel's routing
+
 ### Deploy to Render
 
 1. Create account on [Render](https://render.com/)
@@ -196,6 +231,14 @@ See `.env.example` for a complete template.
    - `EMAIL_PASS`
    - `FRONTEND_URL`
 6. Deploy!
+
+### Deploy to Railway
+
+1. Go to [Railway.app](https://railway.app/)
+2. Click "New Project" → "Deploy from GitHub"
+3. Select `mern-review-system` repository
+4. Add environment variables
+5. Railway auto-detects and deploys!
 
 ### Deploy to Heroku
 
@@ -228,6 +271,7 @@ git push heroku main
 - ✅ CORS configuration
 - ✅ Password reset tokens with expiration
 - ✅ HTTP-only cookies support
+- ✅ Serverless-optimized MongoDB connections
 
 ## 📧 Email Configuration
 
@@ -250,8 +294,28 @@ npm test
 
 # Test API endpoints
 # Use Postman, Thunder Client, or curl
+curl http://localhost:5000/api/health
 curl http://localhost:5000/api/reviews
 ```
+
+## 🐛 Troubleshooting
+
+### Vercel Deployment Issues
+
+**Error: "Module not found"**
+- ✅ Check `vercel.json` configuration
+- ✅ Ensure all dependencies are in `package.json`
+- ✅ Verify `backend/` folder structure
+
+**Error: "MongoDB connection failed"**
+- ✅ Add `MONGODB_URI` to Vercel environment variables
+- ✅ Whitelist Vercel IPs in MongoDB Atlas (or use 0.0.0.0/0)
+- ✅ Check MongoDB connection string format
+
+**Error: "Function timeout"**
+- ✅ Optimize MongoDB queries
+- ✅ Use connection pooling (already implemented)
+- ✅ Consider upgrading Vercel plan for longer timeouts
 
 ## 🤝 Contributing
 
@@ -292,6 +356,7 @@ For issues or questions:
 ✅ Activity tracking  
 ✅ Password reset via email  
 ✅ Booking.com integration support  
+✅ Vercel serverless deployment  
 ✅ Production ready  
 ✅ Easy deployment  
 
