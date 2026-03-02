@@ -2,26 +2,48 @@ const nodemailer = require('nodemailer');
 
 // Check if email is configured
 const isEmailConfigured = () => {
-  return !!(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
+  const configured = !!(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
+  if (!configured) {
+    console.log('⚠️ Email not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD in environment variables.');
+  }
+  return configured;
 };
 
-// Create reusable transporter
+// Create reusable transporter with better error handling
 const createTransporter = () => {
   if (!isEmailConfigured()) {
-    console.warn('⚠️ Email not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD in environment variables.');
     return null;
   }
 
   try {
-    return nodemailer.createTransporter({
+    // Remove any spaces from password
+    const cleanPassword = process.env.EMAIL_APP_PASSWORD.replace(/\s/g, '');
+    
+    const transporter = nodemailer.createTransporter({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_APP_PASSWORD
+        pass: cleanPassword
+      },
+      // Add timeout and retry settings
+      pool: true,
+      maxConnections: 1,
+      rateDelta: 20000,
+      rateLimit: 5
+    });
+
+    // Verify transporter configuration
+    transporter.verify((error, success) => {
+      if (error) {
+        console.error('❌ Email transporter verification failed:', error.message);
+      } else {
+        console.log('✅ Email service is ready to send messages');
       }
     });
+
+    return transporter;
   } catch (error) {
-    console.error('Error creating email transporter:', error);
+    console.error('❌ Error creating email transporter:', error.message);
     return null;
   }
 };
@@ -72,7 +94,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
               
               <p>Get started by logging in and sharing your first review!</p>
               
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="button">Login Now</a>
+              <a href="${process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app'}/login" class="button">Login Now</a>
               
               <p>If you have any questions, feel free to reach out to us.</p>
               
@@ -88,9 +110,9 @@ const sendWelcomeEmail = async (userEmail, userName) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Welcome email sent to:', userEmail);
-    return { success: true };
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Welcome email sent to:', userEmail, '| Message ID:', info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending welcome email:', error.message);
     return { success: false, error: error.message };
@@ -110,7 +132,10 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
       };
     }
     
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app'}/reset-password/${resetToken}`;
+    
+    console.log('📤 Sending password reset email to:', userEmail);
+    console.log('🔗 Reset URL:', resetUrl);
     
     const mailOptions = {
       from: `"Review System" <${process.env.EMAIL_USER}>`,
@@ -167,11 +192,12 @@ const sendPasswordResetEmail = async (userEmail, userName, resetToken) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Password reset email sent to:', userEmail);
-    return { success: true };
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset email sent to:', userEmail, '| Message ID:', info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending password reset email:', error.message);
+    console.error('❌ Error details:', error);
     return { success: false, error: error.message };
   }
 };
@@ -214,7 +240,7 @@ const sendPasswordResetConfirmation = async (userEmail, userName) => {
               
               <p>You can now login with your new password.</p>
               
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login" class="button">Login Now</a>
+              <a href="${process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app'}/login" class="button">Login Now</a>
               
               <p><strong>⚠️ Security Notice:</strong><br>
               If you didn't make this change, please contact us immediately.</p>
@@ -231,9 +257,9 @@ const sendPasswordResetConfirmation = async (userEmail, userName) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log('✅ Password reset confirmation sent to:', userEmail);
-    return { success: true };
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Password reset confirmation sent to:', userEmail, '| Message ID:', info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending confirmation email:', error.message);
     return { success: false, error: error.message };
