@@ -146,16 +146,6 @@ router.post('/forgot-password', async (req, res) => {
       });
     }
 
-    // Check if email service is configured
-    if (!isEmailConfigured()) {
-      console.log('❌ Email service not configured');
-      return res.status(503).json({
-        success: false,
-        message: 'Email service is not configured. Please contact the administrator to set up email functionality.',
-        emailConfigured: false
-      });
-    }
-
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
     
@@ -176,8 +166,14 @@ router.post('/forgot-password', async (req, res) => {
 
     console.log('🔑 Reset token generated for user:', user.email);
 
+    // Build reset URL
+    const frontendUrl = process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
     // Try to send email to USER'S email address
     console.log('📤 Attempting to send password reset email to USER:', user.email);
+    console.log('📧 Email configured:', isEmailConfigured());
+    
     const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
     console.log('📧 Email send result:', emailResult);
@@ -189,13 +185,16 @@ router.post('/forgot-password', async (req, res) => {
         message: 'Password reset link has been sent to your email address. Please check your inbox.'
       });
     } else {
-      // Email failed - log error but don't expose details to user
+      // Email failed - return success message with reset URL as fallback
       console.error('❌ Email service error:', emailResult.error);
-      return res.status(503).json({
-        success: false,
-        message: 'Failed to send password reset email. Please try again later or contact support.',
-        emailConfigured: true,
-        emailError: 'Email delivery failed'
+      console.log('⚠️ Returning reset URL as fallback');
+      
+      return res.json({
+        success: true,
+        message: 'Password reset link generated. Email service is currently unavailable.',
+        resetUrl: resetUrl,
+        note: 'Please use this link to reset your password. It will expire in 10 minutes.',
+        emailError: true
       });
     }
 
