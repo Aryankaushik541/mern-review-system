@@ -146,6 +146,16 @@ router.post('/forgot-password', async (req, res) => {
       });
     }
 
+    // Check if email service is configured
+    if (!isEmailConfigured()) {
+      console.log('❌ Email service not configured');
+      return res.status(503).json({
+        success: false,
+        message: 'Email service is not configured. Please contact the administrator to set up email functionality.',
+        emailConfigured: false
+      });
+    }
+
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
     
@@ -156,7 +166,7 @@ router.post('/forgot-password', async (req, res) => {
       console.log('⚠️ User not found, returning generic success message');
       return res.json({
         success: true,
-        message: 'If an account exists with this email, a password reset link has been sent.'
+        message: 'If an account exists with this email, a password reset link has been sent to your email address.'
       });
     }
 
@@ -166,44 +176,26 @@ router.post('/forgot-password', async (req, res) => {
 
     console.log('🔑 Reset token generated for user:', user.email);
 
-    // Build reset URL
-    const frontendUrl = process.env.FRONTEND_URL || 'https://booking-review-system.vercel.app';
-    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
-
-    // Check if email is configured
-    if (!isEmailConfigured()) {
-      console.log('⚠️ Email service not configured');
-      return res.json({
-        success: true,
-        message: 'Password reset link generated. Email service is currently unavailable.',
-        resetUrl: resetUrl,
-        instructions: 'Copy this link and paste it in your browser to reset your password.',
-        note: 'This link will expire in 10 minutes.'
-      });
-    }
-
-    // Try to send email
-    console.log('📤 Attempting to send password reset email...');
+    // Try to send email to USER'S email address
+    console.log('📤 Attempting to send password reset email to USER:', user.email);
     const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
     console.log('📧 Email send result:', emailResult);
 
     if (emailResult.success) {
-      console.log('✅ Password reset email sent successfully');
+      console.log('✅ Password reset email sent successfully to:', user.email);
       return res.json({
         success: true,
-        message: 'Password reset link has been sent to your email.'
+        message: 'Password reset link has been sent to your email address. Please check your inbox.'
       });
     } else {
-      // Email failed, return URL as fallback
+      // Email failed - log error but don't expose details to user
       console.error('❌ Email service error:', emailResult.error);
-      return res.json({
-        success: true,
-        message: 'Password reset link generated. Email service is currently unavailable.',
-        resetUrl: resetUrl,
-        instructions: 'Copy this link and paste it in your browser to reset your password.',
-        note: 'This link will expire in 10 minutes.',
-        emailError: emailResult.error
+      return res.status(503).json({
+        success: false,
+        message: 'Failed to send password reset email. Please try again later or contact support.',
+        emailConfigured: true,
+        emailError: 'Email delivery failed'
       });
     }
 
