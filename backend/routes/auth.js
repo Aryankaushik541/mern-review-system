@@ -157,20 +157,35 @@ router.post('/forgot-password', async (req, res) => {
     const resetToken = user.generatePasswordResetToken();
     await user.save();
 
-    // Send password reset email
-    const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
+    // Try to send password reset email
+    try {
+      const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: 'Error sending password reset email. Please try again later.'
+      if (!emailResult.success) {
+        console.error('Email service error:', emailResult.error);
+        
+        // Return success but with a note about email service
+        return res.json({
+          success: true,
+          message: 'Password reset token generated. However, email service is currently unavailable. Please contact administrator.',
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Password reset link has been sent to your email.'
+      });
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError);
+      
+      // Still return success to not reveal if user exists
+      res.json({
+        success: true,
+        message: 'If an account exists with this email, a password reset link will be sent shortly.',
+        note: 'Email service is currently experiencing issues. Please try again later or contact support.'
       });
     }
-
-    res.json({
-      success: true,
-      message: 'Password reset link has been sent to your email.'
-    });
 
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -222,7 +237,7 @@ router.post('/reset-password/:token', async (req, res) => {
     user.resetPasswordExpires = null;
     await user.save();
 
-    // Send confirmation email
+    // Send confirmation email (don't wait for it)
     sendPasswordResetConfirmation(user.email, user.name).catch(err =>
       console.error('Failed to send confirmation email:', err)
     );
@@ -247,16 +262,21 @@ router.post('/reset-password/:token', async (req, res) => {
 // @access  Private
 router.get('/me', auth, async (req, res) => {
   try {
+    const user = await User.findById(req.userId).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
     res.json({
       success: true,
-      data: {
-        userId: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        role: req.user.role
-      }
+      data: user
     });
   } catch (error) {
+    console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
