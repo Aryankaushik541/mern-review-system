@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
-const { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordResetConfirmation } = require('../utils/emailService');
+const { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordResetConfirmation, isEmailConfigured } = require('../utils/emailService');
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -48,9 +48,11 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send welcome email (don't wait for it)
-    sendWelcomeEmail(user.email, user.name).catch(err => 
-      console.error('Failed to send welcome email:', err)
-    );
+    if (isEmailConfigured()) {
+      sendWelcomeEmail(user.email, user.name).catch(err => 
+        console.error('Failed to send welcome email:', err)
+      );
+    }
 
     // Generate token
     const token = generateToken(user._id);
@@ -135,6 +137,8 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
+    console.log('📧 Forgot password request for:', email);
+
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -145,8 +149,11 @@ router.post('/forgot-password', async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email: email.toLowerCase() });
     
+    console.log('👤 User found:', user ? 'Yes' : 'No');
+
     if (!user) {
       // Don't reveal if user exists or not for security
+      console.log('⚠️ User not found, returning generic success message');
       return res.json({
         success: true,
         message: 'If an account exists with this email, a password reset link has been sent.'
@@ -157,38 +164,59 @@ router.post('/forgot-password', async (req, res) => {
     const resetToken = user.generatePasswordResetToken();
     await user.save();
 
+    console.log('🔑 Reset token generated for user:', user.email);
+
+    // Check if email is configured
+    if (!isEmailConfigured()) {
+      console.log('⚠️ Email service not configured');
+      return res.json({
+        success: true,
+        message: 'Password reset token generated successfully.',
+        warning: 'Email service is not configured. Please contact administrator for password reset.',
+        // Only show token in development
+        ...(process.env.NODE_ENV === 'development' && { resetToken })
+      });
+    }
+
     // Try to send password reset email
     try {
+      console.log('📤 Attempting to send email to:', user.email);
       const emailResult = await sendPasswordResetEmail(user.email, user.name, resetToken);
 
+      console.log('📧 Email send result:', emailResult);
+
       if (!emailResult.success) {
-        console.error('Email service error:', emailResult.error);
+        console.error('❌ Email service error:', emailResult.error);
         
-        // Return success but with a note about email service
         return res.json({
           success: true,
-          message: 'Password reset token generated. However, email service is currently unavailable. Please contact administrator.',
-          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+          message: 'Password reset requested.',
+          warning: 'Email delivery is currently experiencing issues. Please try again later or contact support.',
+          // Only show token in development
+          ...(process.env.NODE_ENV === 'development' && { resetToken })
         });
       }
 
+      console.log('✅ Password reset email sent successfully');
       res.json({
         success: true,
         message: 'Password reset link has been sent to your email.'
       });
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
+      console.error('❌ Email sending failed:', emailError);
       
       // Still return success to not reveal if user exists
       res.json({
         success: true,
-        message: 'If an account exists with this email, a password reset link will be sent shortly.',
-        note: 'Email service is currently experiencing issues. Please try again later or contact support.'
+        message: 'Password reset requested.',
+        warning: 'Email service is currently unavailable. Please try again later.',
+        // Only show token in development
+        ...(process.env.NODE_ENV === 'development' && { resetToken })
       });
     }
 
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error('❌ Forgot password error:', error);
     res.status(500).json({
       success: false,
       message: 'Server error. Please try again later.',
@@ -238,9 +266,11 @@ router.post('/reset-password/:token', async (req, res) => {
     await user.save();
 
     // Send confirmation email (don't wait for it)
-    sendPasswordResetConfirmation(user.email, user.name).catch(err =>
-      console.error('Failed to send confirmation email:', err)
-    );
+    if (isEmailConfigured()) {
+      sendPasswordResetConfirmation(user.email, user.name).catch(err =>
+        console.error('Failed to send confirmation email:', err)
+      );
+    }
 
     res.json({
       success: true,
